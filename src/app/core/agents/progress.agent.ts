@@ -6,15 +6,7 @@ import { AiService } from '../services/ai.service';
 import { FirestoreService } from '../services/firestore.service';
 import { AgentDecision, WorkoutPlan, SessionFeedback } from '../models';
 
-/**
- * ProgressAgent — monitors session feedback and adjusts workout difficulty.
- *
- * Architecture:
- *  - Listens to session$ stream (emitted by components after user feedback).
- *  - When feedback arrives, analyzes pattern and triggers plan adjustment.
- *  - Computes progress metrics and pushes to state.
- *  - Does NOT call PlannerAgent — emits to state; PlannerAgent reacts independently if needed.
- */
+
 @Injectable({ providedIn: 'root' })
 export class ProgressAgent implements OnDestroy {
   private readonly state = inject(StateService);
@@ -23,7 +15,7 @@ export class ProgressAgent implements OnDestroy {
 
   private readonly subscriptions = new Subscription();
 
-  // Command stream for manual progress recalculation
+  
   private readonly _recalculate$ = new Subject<void>();
 
   constructor() {
@@ -31,17 +23,17 @@ export class ProgressAgent implements OnDestroy {
     this.initRecalculationStream();
   }
 
-  // ─── Public Command Interface ─────────────────────────────────────────────
+  
 
-  /** Trigger a manual recalculation of progress metrics */
+  
   recalculate(): void {
     this._recalculate$.next();
   }
 
-  // ─── Stream Logic ─────────────────────────────────────────────────────────
+  
 
   private initFeedbackStream(): void {
-    // React to every new session that has feedback
+    
     const sub = this.state.session$
       .pipe(
         filter((session) => session !== null && session.feedback !== undefined),
@@ -49,9 +41,16 @@ export class ProgressAgent implements OnDestroy {
         tap(([session, plan]) => {
           if (!session || !plan) return;
 
+          const feedbackMap: Record<string, string> = {
+            too_easy: 'muito fácil',
+            just_right: 'na medida certa',
+            too_hard: 'muito difícil',
+          };
+          const translatedFeedback = session.feedback ? feedbackMap[session.feedback] || session.feedback : '';
+
           this.emitDecision(
-            `Session feedback received: "${session.feedback}"`,
-            `Analyzing difficulty alignment for Day ${session.dayIndex + 1}`,
+            `Feedback de sessão recebido: "${translatedFeedback}"`,
+            `Analisando alinhamento de dificuldade para o Dia ${session.dayIndex + 1}`,
             { feedback: session.feedback, dayIndex: session.dayIndex },
           );
 
@@ -65,21 +64,29 @@ export class ProgressAgent implements OnDestroy {
 
           const reason =
             session.feedback === 'too_easy'
-              ? 'User found workouts too easy — increase intensity and volume'
-              : 'User found workouts too hard — reduce intensity and increase rest';
+              ? 'Usuário achou o treino fácil demais — aumentar intensidade e volume'
+              : 'Usuário achou o treino difícil demais — reduzir intensidade e aumentar descanso';
 
           return this.aiService.adjustWorkout(plan, reason).pipe(
             catchError((err) => {
-              this.emitDecision('Plan adjustment failed', err.message);
+              this.emitDecision('Falha no ajuste do plano', err.message);
               return EMPTY;
             }),
           );
         }),
         tap((adjustedPlan) => {
           this.state.setWorkoutPlan(adjustedPlan);
+          
+          const levels: Record<string, string> = {
+            beginner: 'iniciante',
+            intermediate: 'intermediário',
+            advanced: 'avançado',
+          };
+          const translatedLevel = levels[adjustedPlan.fitnessLevel] || adjustedPlan.fitnessLevel;
+
           this.emitDecision(
-            'Automatically adjusted workout plan based on session feedback',
-            `New plan: Week ${adjustedPlan.weekNumber}, ${adjustedPlan.fitnessLevel} level`,
+            'Plano de treino ajustado automaticamente com base no feedback da sessão',
+            `Novo plano: Semana ${adjustedPlan.weekNumber}, nível ${translatedLevel}`,
             { planId: adjustedPlan.id },
           );
         }),
@@ -102,7 +109,7 @@ export class ProgressAgent implements OnDestroy {
     this.subscriptions.add(sub);
   }
 
-  // ─── Business Logic ───────────────────────────────────────────────────────
+  
 
   private updateProgressMetrics(feedback: SessionFeedback, plan: WorkoutPlan | null): void {
     const current = this.state.getCurrentProgress();
@@ -130,7 +137,7 @@ export class ProgressAgent implements OnDestroy {
     }
   }
 
-  // ─── Decision Emitter ─────────────────────────────────────────────────────
+  
 
   private emitDecision(
     reason: string,
@@ -153,3 +160,4 @@ export class ProgressAgent implements OnDestroy {
     this._recalculate$.complete();
   }
 }
+

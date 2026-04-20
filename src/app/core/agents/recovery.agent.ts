@@ -4,15 +4,7 @@ import { tap, withLatestFrom, filter, map } from 'rxjs';
 import { StateService } from '../state/state.service';
 import { AgentDecision, FatigueLevel } from '../models';
 
-/**
- * RecoveryAgent — monitors fatigue trends and emits recovery recommendations.
- *
- * Architecture:
- *  - Periodic analysis (every 5 minutes in a real app; here driven by session changes).
- *  - Listens to session$ to detect fatigue accumulation patterns.
- *  - Writes ONLY to fatigue$ — no AI calls, no plan modification.
- *  - ProgressAgent will react to fatigue$ if needed.
- */
+
 @Injectable({ providedIn: 'root' })
 export class RecoveryAgent implements OnDestroy {
   private readonly state = inject(StateService);
@@ -25,17 +17,17 @@ export class RecoveryAgent implements OnDestroy {
     this.initManualEvaluation();
   }
 
-  // ─── Public Command Interface ─────────────────────────────────────────────
+  
 
-  /** Manually trigger a fatigue/recovery evaluation */
+  
   evaluate(): void {
     this._evaluate$.next();
   }
 
-  // ─── Stream Logic ─────────────────────────────────────────────────────────
+  
 
   private initSessionMonitor(): void {
-    // Evaluate fatigue every time a session is completed
+    
     const sub = this.state.session$
       .pipe(
         filter((session) => session !== null),
@@ -47,9 +39,17 @@ export class RecoveryAgent implements OnDestroy {
         filter((fatigue): fatigue is FatigueLevel => fatigue !== null),
         tap((fatigue) => {
           this.state.setFatigue(fatigue);
+
+          const trendMap: Record<string, string> = {
+            increasing: 'aumentando',
+            stable: 'estável',
+            decreasing: 'diminuindo',
+          };
+          const translatedTrend = trendMap[fatigue.trend] || fatigue.trend;
+
           this.emitDecision(
-            `Fatigue score updated: ${fatigue.score}/10 (${fatigue.trend})`,
-            `Recommendation: ${this.formatRecommendation(fatigue.recommendation)}`,
+            `Índice de fadiga atualizado: ${fatigue.score}/10 (${translatedTrend})`,
+            `Recomendação: ${this.formatRecommendation(fatigue.recommendation)}`,
             { score: fatigue.score, trend: fatigue.trend, recommendation: fatigue.recommendation },
           );
         }),
@@ -67,8 +67,8 @@ export class RecoveryAgent implements OnDestroy {
           const updated = this.computeFatigue(progress.sessionsCompleted, undefined, currentFatigue.score);
           this.state.setFatigue(updated);
           this.emitDecision(
-            'Manual fatigue re-evaluation triggered',
-            `Updated recommendation: ${this.formatRecommendation(updated.recommendation)}`,
+            'Reavaliação manual de fadiga acionada',
+            `Recomendação atualizada: ${this.formatRecommendation(updated.recommendation)}`,
           );
         }),
       )
@@ -77,17 +77,17 @@ export class RecoveryAgent implements OnDestroy {
     this.subscriptions.add(sub);
   }
 
-  // ─── Business Logic ───────────────────────────────────────────────────────
+  
 
   private computeFatigue(
     sessionsCompleted: number,
     lastFeedback?: string,
     currentScore: number = 0,
   ): FatigueLevel {
-    // Base score: increases with consecutive sessions
+    
     let score = Math.min(10, currentScore + (sessionsCompleted % 3 === 0 ? 2 : 1));
 
-    // Feedback modifier
+    
     if (lastFeedback === 'too_hard') score = Math.min(10, score + 2);
     if (lastFeedback === 'too_easy') score = Math.max(0, score - 1);
     if (lastFeedback === 'just_right') score = Math.max(0, score - 0.5);
@@ -105,14 +105,14 @@ export class RecoveryAgent implements OnDestroy {
 
   private formatRecommendation(rec: FatigueLevel['recommendation']): string {
     const map: Record<FatigueLevel['recommendation'], string> = {
-      train: 'Full training session recommended',
-      light_session: 'Light session — focus on mobility and technique',
-      rest: 'Full rest day recommended to prevent overtraining',
+      train: 'Sessão de treino completa recomendada',
+      light_session: 'Sessão leve — foco em mobilidade e técnica',
+      rest: 'Dia de descanso completo recomendado para evitar overtraining',
     };
     return map[rec];
   }
 
-  // ─── Decision Emitter ─────────────────────────────────────────────────────
+  
 
   private emitDecision(
     reason: string,
@@ -135,3 +135,4 @@ export class RecoveryAgent implements OnDestroy {
     this._evaluate$.complete();
   }
 }
+
