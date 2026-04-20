@@ -1,6 +1,7 @@
 @if (user$ | async; as user) {
+  <div class="bg-glow"></div>
   <div class="app-shell">
-    <!-- Sidebar -->
+    <!-- Menu Lateral -->
     <aside class="sidebar">
       <!-- Logo -->
       <div class="sidebar-logo">
@@ -11,12 +12,12 @@
           </svg>
         </div>
         <div class="logo-text">
-          <span class="logo-name">AI Fitness</span>
-          <span class="logo-sub">Agent</span>
+          <span class="logo-name">Fitness IA</span>
+          <span class="logo-sub">Agente</span>
         </div>
       </div>
 
-      <!-- Navigation -->
+      <!-- Navegação -->
       <nav class="sidebar-nav">
         <a
           id="nav-workout"
@@ -24,7 +25,7 @@
           routerLinkActive="active"
           class="nav-item">
           <span class="nav-icon">🏋️</span>
-          <span class="nav-label">Workout</span>
+          <span class="nav-label">Treino</span>
         </a>
         <a
           id="nav-dashboard"
@@ -32,7 +33,7 @@
           routerLinkActive="active"
           class="nav-item">
           <span class="nav-icon">📊</span>
-          <span class="nav-label">Dashboard</span>
+          <span class="nav-label">Painel</span>
         </a>
         <a
           id="nav-chat"
@@ -40,50 +41,49 @@
           routerLinkActive="active"
           class="nav-item">
           <span class="nav-icon">🤖</span>
-          <span class="nav-label">AI Coach</span>
+          <span class="nav-label">Coach IA</span>
           @if ((workoutPlan$ | async) !== null) {
             <span class="nav-badge"></span>
           }
         </a>
       </nav>
 
-      <!-- Fatigue Indicator -->
+      <!-- Indicador de Fadiga -->
       @if (fatigue$ | async; as fatigue) {
         <div class="fatigue-widget">
           <div class="fatigue-label">
-            <span>Recovery</span>
+            <span>Recuperação</span>
             <span>{{ getFatigueLabel(fatigue.score) }} {{ fatigue.score }}/10</span>
           </div>
           <div class="fatigue-track">
             <div class="fatigue-fill" [style.width.%]="fatigue.score * 10"></div>
           </div>
-          <p class="fatigue-rec">{{ fatigue.recommendation === 'rest' ? 'Rest today' :
-                                    fatigue.recommendation === 'light_session' ? 'Light session' :
-                                    'Ready to train' }}</p>
+          <p class="fatigue-rec">{{ fatigue.recommendation === 'rest' ? 'Descanse hoje' :
+                                    fatigue.recommendation === 'light_session' ? 'Sessão leve' :
+                                    'Pronto para treinar' }}</p>
         </div>
       }
 
-      <!-- Spacer -->
       <div class="sidebar-spacer"></div>
 
-      <!-- Agent Log Badge -->
+      <!-- Badge de Atividade dos Agentes -->
       @if (agentDecisions$ | async; as decisions) {
         @if (decisions.length > 0) {
           <div class="agent-activity">
             <div class="activity-dot"></div>
-            <span>{{ decisions.length }} agent action{{ decisions.length > 1 ? 's' : '' }}</span>
+            <span>{{ decisions.length }} {{ decisions.length === 1 ? 'ação' : 'ações' }} dos agentes</span>
           </div>
         }
       }
 
-      <!-- User -->
+      <!-- Usuário -->
       <div class="sidebar-user">
         <div class="user-avatar">{{ user.displayName.charAt(0).toUpperCase() }}</div>
         <div class="user-info">
           <span class="user-name">{{ user.displayName }}</span>
           <span class="user-level">{{ user.fitnessLevel | titlecase }}</span>
         </div>
-        <button id="btn-signout" class="signout-btn" (click)="signOut()" title="Sign out">
+        <button id="btn-signout" class="signout-btn" (click)="signOut()" title="Sair">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
             <polyline points="16 17 21 12 16 7"/>
@@ -93,12 +93,12 @@
       </div>
     </aside>
 
-    <!-- Main Content -->
+    <!-- Conteúdo Principal -->
     <main class="main-content">
       <router-outlet />
     </main>
   </div>
 } @else {
-  <!-- Unauthenticated: just show the router outlet (login page) -->
+  <!-- Não autenticado: exibe apenas a tela de login -->
   <router-outlet />
 }
