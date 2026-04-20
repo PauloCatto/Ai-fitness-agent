@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-/** Converts minutes to "Xh Ym" or just "Xm" */
+
 @Pipe({ name: 'duration', standalone: true })
 export class DurationPipe implements PipeTransform {
   transform(minutes: number | undefined | null): string {
@@ -11,3 +11,4 @@ export class DurationPipe implements PipeTransform {
     return m > 0 ? `${h}h ${m}m` : `${h}h`;
   }
 }
+
