@@ -1,6 +1,17 @@
-// ─── Primitive Types ─────────────────────────────────────────────────────────
+
 
 export type FitnessLevel = 'beginner' | 'intermediate' | 'advanced';
+
+export type GoalType = 'hypertrophy' | 'strength' | 'weight_loss' | 'endurance';
+
+export type PhysicalLimitation =
+  | 'joelho'
+  | 'ombro'
+  | 'lombar'
+  | 'quadril'
+  | 'tornozelo'
+  | 'cervical'
+  | 'punho';
 
 export type Equipment =
   | 'barbell'
@@ -25,7 +36,7 @@ export type SessionFeedback = 'too_easy' | 'just_right' | 'too_hard';
 
 export type AgentName = 'PlannerAgent' | 'ProgressAgent' | 'RecoveryAgent' | 'CoachAgent';
 
-// ─── User ────────────────────────────────────────────────────────────────────
+
 
 export interface UserProfile {
   uid: string;
@@ -36,6 +47,13 @@ export interface UserProfile {
   goals: string[];
   preferences: WorkoutPreferences;
   createdAt: Date;
+  
+  onboardingCompleted: boolean;
+  goal: GoalType;
+  age: number;
+  weight: number;
+  limitations: PhysicalLimitation[];
+  injuries: string;
 }
 
 export interface WorkoutPreferences {
@@ -45,7 +63,7 @@ export interface WorkoutPreferences {
   focusAreas: MuscleGroup[];
 }
 
-// ─── Workout Plan ─────────────────────────────────────────────────────────────
+
 
 export interface Exercise {
   id: string;
@@ -61,7 +79,7 @@ export interface Exercise {
 }
 
 export interface WorkoutDay {
-  day: number; // 1–7
+  day: number; 
   label: string;
   focus: string;
   isRestDay: boolean;
@@ -81,7 +99,7 @@ export interface WorkoutPlan {
   agentReasoning: string;
 }
 
-// ─── Session & Progress ───────────────────────────────────────────────────────
+
 
 export interface WorkoutSession {
   id: string;
@@ -96,24 +114,24 @@ export interface WorkoutSession {
 }
 
 export interface FatigueLevel {
-  score: number; // 0–10
+  score: number; 
   trend: 'increasing' | 'stable' | 'decreasing';
   lastUpdated: Date;
   recommendation: 'train' | 'light_session' | 'rest';
 }
 
 export interface ProgressMetrics {
-  weeklyConsistency: number; // 0–100
-  volumeProgression: number; // % change from previous week
+  weeklyConsistency: number; 
+  volumeProgression: number; 
   fatigueAverage: number;
   sessionsCompleted: number;
-  streak: number; // consecutive training days
+  streak: number; 
   lastUpdated: Date;
 }
 
-// ─── Agents ───────────────────────────────────────────────────────────────────
 
-/** Structured decision emitted by every agent — stored in state for UI display */
+
+
 export interface AgentDecision {
   id: string;
   agentName: AgentName;
@@ -123,7 +141,7 @@ export interface AgentDecision {
   metadata?: Record<string, unknown>;
 }
 
-// ─── Chat ─────────────────────────────────────────────────────────────────────
+
 
 export interface ChatMessage {
   id: string;
@@ -133,8 +151,8 @@ export interface ChatMessage {
   isStreaming?: boolean;
 }
 
-// ─── AI Response DTOs ────────────────────────────────────────────────────────
-// Strongly typed shapes expected from Gemini JSON output
+
+
 
 export interface AiExerciseDto {
   id: string;
@@ -165,3 +183,4 @@ export interface AiWorkoutResponseDto {
   estimatedWeeklyMinutes: number;
   days: AiWorkoutDayDto[];
 }
+
