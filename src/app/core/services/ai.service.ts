@@ -14,25 +14,12 @@ import {
   MuscleGroup,
 } from '../models';
 
-/**
- * AiService — the ONLY entry point for Gemini API calls.
- *
- * Responsibilities:
- *  - Return Observables only (never mutates state).
- *  - Stream partial text responses for chat (typewriter effect).
- *  - Parse AI JSON output into strongly typed models.
- *  - Fall back to mock data when `environment.useMockAi = true`.
- *
- * Agents consume these Observables and push results to StateService.
- */
+
 @Injectable({ providedIn: 'root' })
 export class AiService {
-  // ─── Public API ────────────────────────────────────────────────────────────
+  
 
-  /**
-   * Generate a full workout plan for a user.
-   * Returns an Observable<WorkoutPlan> (single emit).
-   */
+  
   generateWorkout(profile: UserProfile): Observable<WorkoutPlan> {
     if (environment.useMockAi) {
       return this.mockGenerateWorkout(profile);
@@ -40,11 +27,7 @@ export class AiService {
     return this.geminiGenerateWorkout(profile);
   }
 
-  /**
-   * Explain a workout plan or answer a fitness question.
-   * Returns a streaming Observable<string> — each emission is a new chunk/token.
-   * Use `scan((acc, chunk) => acc + chunk)` in the consumer to accumulate.
-   */
+  
   explainWorkout(plan: WorkoutPlan, question?: string): Observable<string> {
     if (environment.useMockAi) {
       return this.mockStreamText(this.buildExplainMockText(plan, question));
@@ -52,10 +35,7 @@ export class AiService {
     return this.geminiStream(this.buildExplainPrompt(plan, question));
   }
 
-  /**
-   * Adjust an existing plan based on session feedback.
-   * Returns an Observable<WorkoutPlan> (single emit).
-   */
+  
   adjustWorkout(plan: WorkoutPlan, feedbackReason: string): Observable<WorkoutPlan> {
     if (environment.useMockAi) {
       return this.mockAdjustWorkout(plan, feedbackReason);
@@ -67,10 +47,7 @@ export class AiService {
     );
   }
 
-  /**
-   * Send a freeform chat message to the coach.
-   * Returns a streaming Observable<string>.
-   */
+  
   chat(message: string, context: string): Observable<string> {
     if (environment.useMockAi) {
       return this.mockStreamText(this.buildChatMockResponse(message));
@@ -78,10 +55,10 @@ export class AiService {
     return this.geminiStream(this.buildChatPrompt(message, context));
   }
 
-  // ─── Gemini Integration ────────────────────────────────────────────────────
+  
 
   private async getGeminiModel() {
-    // Dynamic import — avoids bundling the SDK when mock mode is on
+    
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(environment.geminiApiKey);
     return genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
@@ -127,64 +104,90 @@ export class AiService {
           .catch((err) => observer.error(err));
       });
 
-      return () => {}; // cleanup — Gemini SDK streams auto-terminate
+      return () => {}; 
     });
   }
 
-  // ─── Prompt Builders ──────────────────────────────────────────────────────
+  
 
   private buildWorkoutPrompt(
     profile: UserProfile,
     existingPlan?: WorkoutPlan,
     feedbackReason?: string,
   ): string {
+    const limitationsText =
+      profile.limitations && profile.limitations.length > 0
+        ? profile.limitations.join(', ')
+        : 'Nenhuma';
+    const injuriesText = profile.injuries?.trim() || 'Nenhuma';
     const adjustNote = existingPlan
-      ? `The user gave feedback on the previous plan: "${feedbackReason}". Adjust accordingly.`
+      ? `O usuário deu o seguinte feedback sobre o plano anterior: "${feedbackReason}". Ajuste o plano de acordo.`
       : '';
 
-    return `
-You are an expert personal trainer AI. Generate a personalized ${profile.preferences.daysPerWeek}-day workout plan.
+    const goalLabels: Record<string, string> = {
+      hypertrophy: 'Hipertrofia (ganho de massa muscular)',
+      strength: 'Força (aumentar carga nos exercícios)',
+      weight_loss: 'Emagrecimento (perda de gordura corporal)',
+      endurance: 'Resistência (melhorar condicionamento físico)',
+    };
 
-User Profile:
-- Fitness Level: ${profile.fitnessLevel}
-- Goals: ${profile.goals.join(', ')}
-- Session Duration: ${profile.preferences.sessionDurationMinutes} minutes
-- Available Equipment: ${profile.preferences.availableEquipment.join(', ')}
-- Focus Areas: ${profile.preferences.focusAreas.join(', ')}
+    return `
+Você é um personal trainer profissional e especialista em prescrição de treino.
+
+Dados do usuário:
+- Nome: ${profile.displayName}
+- Idade: ${profile.age} anos
+- Peso: ${profile.weight} kg
+- Nível de condicionamento: ${profile.fitnessLevel}
+- Objetivo principal: ${goalLabels[profile.goal] ?? profile.goal}
+- Frequência semanal: ${profile.preferences.daysPerWeek} dias por semana
+- Duração por sessão: ${profile.preferences.sessionDurationMinutes} minutos
+- Equipamentos disponíveis: ${profile.preferences.availableEquipment.join(', ')}
+- Áreas de foco: ${profile.preferences.focusAreas.join(', ')}
+- Limitações físicas: ${limitationsText}
+- Lesões / Restrições específicas: ${injuriesText}
 
 ${adjustNote}
 
-Return ONLY valid JSON matching this exact schema (no markdown, no extra text):
+REGRAS OBRIGATÓRIAS:
+- NÃO invente informações sobre o usuário
+- RESPEITE as limitações físicas — evite exercícios que possam agravar a condição
+- Priorize segurança acima de performance
+- Adapte o volume e intensidade ao nível declarado
+- NÃO retorne texto fora do JSON
+
+Retorne SOMENTE JSON válido neste formato exato (sem markdown, sem texto extra):
 {
-  "agentReasoning": "string — explain your reasoning for this plan",
+  "agentReasoning": "string — explique sua lógica para este plano em português",
   "fitnessLevel": "${profile.fitnessLevel}",
   "totalVolume": number,
   "estimatedWeeklyMinutes": number,
   "days": [
     {
       "day": 1,
-      "label": "Monday",
+      "label": "Segunda",
       "focus": "string",
       "isRestDay": false,
       "estimatedMinutes": 45,
       "exercises": [
         {
-          "id": "unique-string",
-          "name": "string",
+          "id": "string-único",
+          "name": "string em português",
           "muscleGroups": ["chest"],
           "sets": 3,
           "reps": "8-12",
           "restSeconds": 60,
-          "difficulty": "intermediate",
-          "instructions": "string",
-          "tips": "string",
+          "difficulty": "${profile.fitnessLevel}",
+          "instructions": "string em português",
+          "tips": "string em português",
           "equipment": ["barbell"]
         }
       ]
     }
   ]
 }
-Generate exactly ${profile.preferences.daysPerWeek} training days plus rest days to fill 7 days.
+Gere exatamente ${profile.preferences.daysPerWeek} dias de treino mais os dias de descanso para completar 7 dias.
+Dias da semana em português: Segunda, Terça, Quarta, Quinta, Sexta, Sábado, Domingo.
 `.trim();
   }
 
@@ -217,10 +220,10 @@ Respond in 1-2 paragraphs max. Be specific, practical, and motivating.
 `.trim();
   }
 
-  // ─── Response Parser ──────────────────────────────────────────────────────
+  
 
   private parseWorkoutResponse(raw: string, profile: UserProfile): WorkoutPlan {
-    // Strip any accidental markdown code fences
+    
     const cleaned = raw.replace(/```json|```/g, '').trim();
 
     let dto: AiWorkoutResponseDto;
@@ -269,11 +272,11 @@ Respond in 1-2 paragraphs max. Be specific, practical, and motivating.
     };
   }
 
-  // ─── Mock Data ────────────────────────────────────────────────────────────
+  
 
   private mockGenerateWorkout(profile: UserProfile): Observable<WorkoutPlan> {
     const plan = this.buildMockPlan(profile);
-    // Simulate network latency
+    
     return of(plan).pipe(delay(1800));
   }
 
@@ -283,7 +286,7 @@ Respond in 1-2 paragraphs max. Be specific, practical, and motivating.
       id: crypto.randomUUID(),
       generatedAt: new Date(),
       weekNumber: plan.weekNumber + 1,
-      agentReasoning: `Adjusted based on feedback: "${reason}". Volume and intensity modified accordingly.`,
+      agentReasoning: `Plano ajustado com base no seu feedback: "${reason}". Volume e intensidade foram modificados para melhor atender às suas necessidades.`,
     };
     return of(adjusted).pipe(delay(1200));
   }
@@ -306,13 +309,13 @@ Respond in 1-2 paragraphs max. Be specific, practical, and motivating.
   }
 
   private buildExplainMockText(plan: WorkoutPlan, question?: string): string {
-    return `Great question! Your ${plan.fitnessLevel} level ${plan.days.filter((d) => !d.isRestDay).length}-day plan is designed with progressive overload principles at its core. Each training day targets specific muscle groups to maximize recovery and adaptation. The program balances compound movements — which recruit the most muscle fibers — with isolation work to sculpt and strengthen each area. Rest days are strategically placed to allow your central nervous system and muscles to repair and grow stronger. Stick to it consistently and you'll see measurable results within 3-4 weeks!`;
+    return `Ótima pergunta! Seu plano de ${plan.days.filter((d) => !d.isRestDay).length} dias no nível ${plan.fitnessLevel} é construído com o princípio da sobrecarga progressiva no centro de tudo. Cada dia de treino foca em grupos musculares específicos para maximizar a recuperação e a adaptação. O programa equilibra movimentos compostos — que recrutam o maior número de fibras musculares — com exercícios de isolamento para esculpir e fortalecer cada região. Os dias de descanso são estrategicamente posicionados para permitir que seu sistema nervoso central e seus músculos se reparem e fiquem mais fortes. Mantenha a consistência e você verá resultados mensuráveis em 3 a 4 semanas!`;
   }
 
   private buildChatMockResponse(message: string): string {
     const responses = [
-      `That's a fantastic question about fitness! The key principle here is progressive overload — consistently increasing the challenge on your muscles over time. Whether through more weight, more reps, or reduced rest, your body needs a reason to adapt and grow stronger. Focus on compound movements like squats, deadlifts, and bench press as your foundation, then layer in isolation work. Recovery is equally important: aim for 7-9 hours of sleep and ensure adequate protein intake (1.6-2.2g per kg of bodyweight). You've got this!`,
-      `Nutrition and training are two sides of the same coin for ${message.toLowerCase().includes('weight') ? 'weight management' : 'performance improvement'}. On training days, ensure you consume enough carbohydrates to fuel your sessions. Post-workout, prioritize protein within 30-60 minutes to kickstart muscle protein synthesis. Hydration is often overlooked but critical — aim for at least 2-3 liters of water daily, more on intense training days. Small consistent habits compound into massive results over time.`,
+      `Excelente pergunta sobre treino! O princípio fundamental aqui é a sobrecarga progressiva — aumentar continuamente o desafio imposto aos seus músculos ao longo do tempo. Seja com mais peso, mais repetições ou menos descanso, seu corpo precisa de um motivo para se adaptar e ficar mais forte. Priorize movimentos compostos como agachamento, levantamento terra e supino como base, e adicione exercícios de isolamento complementares. A recuperação é igualmente importante: busque 7 a 9 horas de sono e garanta ingestão adequada de proteína (1,6 a 2,2g por kg de peso corporal). Você consegue!`,
+      `Nutrição e treino são dois lados da mesma moeda para ${message.toLowerCase().includes('peso') ? 'o controle de peso' : 'a melhora do desempenho'}. Nos dias de treino, consuma carboidratos suficientes para abastecer sua sessão. Após o treino, priorize a proteína nos primeiros 30 a 60 minutos para iniciar a síntese proteica muscular. A hidratação é frequentemente negligenciada, mas é fundamental — busque pelo menos 2 a 3 litros de água por dia, mais nos dias de treino intenso. Pequenos hábitos consistentes se somam em resultados expressivos ao longo do tempo.`,
     ];
     return responses[Math.floor(Math.random() * responses.length)];
   }
@@ -320,10 +323,16 @@ Respond in 1-2 paragraphs max. Be specific, practical, and motivating.
   private buildAdjustmentProfile(plan: WorkoutPlan, reason: string): UserProfile {
     return {
       uid: plan.userId,
-      displayName: 'User',
+      displayName: 'Usuário',
       email: '',
       fitnessLevel: plan.fitnessLevel,
       goals: [reason],
+      goal: 'hypertrophy', 
+      age: 30,
+      weight: 75,
+      limitations: [],
+      injuries: '',
+      onboardingCompleted: true,
       createdAt: new Date(),
       preferences: {
         daysPerWeek: plan.days.filter((d) => !d.isRestDay).length,
@@ -343,194 +352,194 @@ Respond in 1-2 paragraphs max. Be specific, practical, and motivating.
       fitnessLevel: profile.fitnessLevel,
       totalVolume: 52,
       estimatedWeeklyMinutes: 215,
-      agentReasoning: `Based on your ${profile.fitnessLevel} fitness level and goals (${profile.goals.join(', ')}), I've designed a balanced ${profile.preferences.daysPerWeek}-day training split using a Push/Pull/Legs structure. This maximizes muscle recovery between sessions while delivering consistent training stimulus. Compound movements are prioritized for hormonal response and efficiency, with isolation work to address weaker links. Progressive overload is built into the rep ranges — when you hit the top of the range comfortably, increase the weight.`,
+      agentReasoning: `Com base no seu nível de condicionamento ${profile.fitnessLevel} e seus objetivos (${profile.goals.join(', ')}), elaborei uma divisão de ${profile.preferences.daysPerWeek} dias usando a estrutura Empurrar/Puxar/Pernas. Isso maximiza a recuperação muscular entre as sessões enquanto mantém um estímulo de treino consistente. Os movimentos compostos são priorizados pela resposta hormonal e eficiência, com exercícios de isolamento para corrigir pontos mais fracos. A sobrecarga progressiva está incorporada nas faixas de repetição — quando atingir o topo da faixa com facilidade, aumente a carga.`,
       days: [
         {
           day: 1,
-          label: 'Monday',
-          focus: 'Push — Chest, Shoulders & Triceps',
+          label: 'Segunda',
+          focus: 'Empurrar — Peito, Ombros e Tríceps',
           isRestDay: false,
           estimatedMinutes: 55,
           exercises: [
             {
               id: 'ex-1-1',
-              name: 'Barbell Bench Press',
+              name: 'Supino Reto com Barra',
               muscleGroups: ['chest', 'triceps', 'shoulders'],
               sets: 4,
               reps: '6-8',
               restSeconds: 90,
               difficulty: 'intermediate',
               instructions:
-                'Lie flat on the bench. Grip bar slightly wider than shoulder-width. Lower to chest with control, press explosively.',
-              tips: 'Keep shoulder blades retracted and feet flat on the floor.',
+                'Deite no banco plano. Pegue a barra um pouco mais larga que a largura dos ombros. Desça com controle até o peito e empurre de forma explosiva.',
+              tips: 'Mantenha as escápulas retraídas e os pés bem apoiados no chão.',
               equipment: ['barbell'],
             },
             {
               id: 'ex-1-2',
-              name: 'Incline Dumbbell Press',
+              name: 'Supino Inclinado com Halteres',
               muscleGroups: ['chest', 'shoulders'],
               sets: 3,
               reps: '10-12',
               restSeconds: 75,
               difficulty: 'intermediate',
               instructions:
-                'Set bench to 30-45° incline. Press dumbbells from shoulder level to full extension.',
-              tips: 'Control the descent — 2-3 seconds down for maximum muscle tension.',
+                'Ajuste o banco para 30-45° de inclinação. Pressione os halteres da altura dos ombros até a extensão completa.',
+              tips: 'Controle a descida — 2 a 3 segundos para baixo para máxima tensão muscular.',
               equipment: ['dumbbell'],
             },
             {
               id: 'ex-1-3',
-              name: 'Overhead Press',
+              name: 'Desenvolvimento Militar',
               muscleGroups: ['shoulders', 'triceps'],
               sets: 3,
               reps: '8-10',
               restSeconds: 75,
               difficulty: 'intermediate',
               instructions:
-                'Press bar from shoulder height to full lockout overhead. Lower with control.',
-              tips: 'Brace your core and keep ribs down throughout the movement.',
+                'Pressione a barra da altura dos ombros até o bloqueio completo acima da cabeça. Desça com controle.',
+              tips: 'Contraia o core e mantenha as costelas abaixadas durante todo o movimento.',
               equipment: ['barbell'],
             },
             {
               id: 'ex-1-4',
-              name: 'Lateral Raises',
+              name: 'Elevação Lateral',
               muscleGroups: ['shoulders'],
               sets: 3,
               reps: '12-15',
               restSeconds: 60,
               difficulty: 'beginner',
               instructions:
-                'With slight elbow bend, raise dumbbells laterally to shoulder height.',
-              tips: 'Lead with elbows, not wrists. Avoid shrugging.',
+                'Com leve flexão nos cotovelos, eleve os halteres lateralmente até a altura dos ombros.',
+              tips: 'Guie pelo cotovelo, não pelo pulso. Evite encolher os ombros.',
               equipment: ['dumbbell'],
             },
             {
               id: 'ex-1-5',
-              name: 'Triceps Rope Pushdown',
+              name: 'Tríceps Corda no Cabo',
               muscleGroups: ['triceps'],
               sets: 3,
               reps: '12-15',
               restSeconds: 60,
               difficulty: 'beginner',
               instructions:
-                'Attach rope to high cable. Push down spreading rope at the bottom until arms are fully extended.',
-              tips: 'Keep elbows pinned to sides throughout the movement.',
+                'Acople a corda ao cabo alto. Empurre para baixo abrindo a corda no final até estender completamente os braços.',
+              tips: 'Mantenha os cotovelos fixados próximos ao corpo durante todo o movimento.',
               equipment: ['machine'],
             },
           ],
         },
         {
           day: 2,
-          label: 'Tuesday',
-          focus: 'Pull — Back & Biceps',
+          label: 'Terça',
+          focus: 'Puxar — Costas e Bíceps',
           isRestDay: false,
           estimatedMinutes: 55,
           exercises: [
             {
               id: 'ex-2-1',
-              name: 'Deadlift',
+              name: 'Levantamento Terra',
               muscleGroups: ['back', 'legs', 'core'],
               sets: 4,
               reps: '4-6',
               restSeconds: 120,
               difficulty: 'intermediate',
               instructions:
-                'Hip-width stance, bar over mid-foot. Hinge hips back, grip bar, drive through floor to stand.',
-              tips: 'Maintain neutral spine. Think "push the floor away" not "pull the bar up".',
+                'Pés na largura do quadril, barra sobre o meio do pé. Quadril para trás, pegue a barra e empurre o chão para ficar de pé.',
+              tips: 'Mantenha a coluna neutra. Pense em "empurrar o chão" e não em "puxar a barra".',
               equipment: ['barbell'],
             },
             {
               id: 'ex-2-2',
-              name: 'Barbell Rows',
+              name: 'Remada com Barra',
               muscleGroups: ['back', 'biceps'],
               sets: 3,
               reps: '8-10',
               restSeconds: 90,
               difficulty: 'intermediate',
-              instructions: 'Hinge forward 45°. Pull bar to lower chest, leading with elbows.',
-              tips: 'Squeeze shoulder blades together at top. Avoid jerking.',
+              instructions: 'Incline o tronco a 45°. Puxe a barra em direção ao peito baixo, liderando com os cotovelos.',
+              tips: 'Aproxime as escápulas no ponto mais alto. Evite movimentos bruscos.',
               equipment: ['barbell'],
             },
             {
               id: 'ex-2-3',
-              name: 'Pull-Ups',
+              name: 'Barra Fixa',
               muscleGroups: ['back', 'biceps'],
               sets: 3,
               reps: '6-10',
               restSeconds: 90,
               difficulty: 'intermediate',
               instructions:
-                'Hang from bar with overhand grip. Pull chest to bar, lower with control.',
-              tips: 'Full range of motion — start from dead hang each rep.',
+                'Suspenda-se na barra com pegada pronada. Puxe o peito até a barra e desça com controle.',
+              tips: 'Amplitude total de movimento — comece com os braços completamente estendidos a cada repetição.',
               equipment: ['bodyweight'],
             },
             {
               id: 'ex-2-4',
-              name: 'Face Pulls',
+              name: 'Face Pull no Cabo',
               muscleGroups: ['shoulders', 'back'],
               sets: 3,
               reps: '15-20',
               restSeconds: 60,
               difficulty: 'beginner',
               instructions:
-                'Set cable at face height. Pull handles toward face, elbows high and flared out.',
-              tips: 'Great for shoulder health. Focus on rear delt contraction.',
+                'Ajuste o cabo na altura do rosto. Puxe as alças em direção ao rosto com cotovelos altos e abertos.',
+              tips: 'Excelente para saúde do ombro. Foque na contração do deltoide posterior.',
               equipment: ['machine'],
             },
             {
               id: 'ex-2-5',
-              name: 'Hammer Curls',
+              name: 'Rosca Martelo',
               muscleGroups: ['biceps'],
               sets: 3,
               reps: '12-15',
               restSeconds: 60,
               difficulty: 'beginner',
               instructions:
-                'Neutral grip (thumbs up). Curl dumbbells alternately to shoulder height.',
-              tips: 'Keep upper arms stationary. Slow on the way down.',
+                'Pegada neutra (polegares para cima). Rosque os halteres alternadamente até a altura dos ombros.',
+              tips: 'Mantenha os braços superiores fixos. Desça devagar.',
               equipment: ['dumbbell'],
             },
           ],
         },
         {
           day: 3,
-          label: 'Wednesday',
-          focus: 'Active Recovery',
+          label: 'Quarta',
+          focus: 'Recuperação Ativa',
           isRestDay: true,
           estimatedMinutes: 20,
           exercises: [],
         },
         {
           day: 4,
-          label: 'Thursday',
-          focus: 'Legs — Quads, Hamstrings & Glutes',
+          label: 'Quinta',
+          focus: 'Pernas — Quadríceps, Isquiotibiais e Glúteos',
           isRestDay: false,
           estimatedMinutes: 65,
           exercises: [
             {
               id: 'ex-4-1',
-              name: 'Barbell Back Squat',
+              name: 'Agachamento com Barra',
               muscleGroups: ['legs', 'glutes', 'core'],
               sets: 4,
               reps: '6-8',
               restSeconds: 120,
               difficulty: 'intermediate',
               instructions:
-                'Bar on upper traps. Squat until thighs parallel or below. Drive through heels.',
-              tips: 'Keep chest up, knees tracking over toes. Depth is king.',
+                'Barra no trapézio superior. Agache até as coxas paralelas ou abaixo. Empurre através dos calcanhares para subir.',
+              tips: 'Mantenha o peito erguido e os joelhos alinhados com os pés. A profundidade é essencial.',
               equipment: ['barbell'],
             },
             {
               id: 'ex-4-2',
-              name: 'Romanian Deadlift',
+              name: 'Levantamento Terra Romeno',
               muscleGroups: ['legs', 'glutes'],
               sets: 3,
               reps: '10-12',
               restSeconds: 90,
               difficulty: 'intermediate',
               instructions:
-                'Start standing. Push hips back, lower bar along legs until hamstring stretch, return.',
-              tips: 'Soft bend in knees. Feel a deep hamstring stretch at the bottom.',
+                'Em pé, empurre os quadris para trás e desça a barra ao longo das pernas até sentir o alongamento dos isquiotibiais. Retorne.',
+              tips: 'Leve flexão nos joelhos. Sinta o alongamento profundo dos isquiotibiais na parte inferior.',
               equipment: ['barbell'],
             },
             {
@@ -542,110 +551,110 @@ Respond in 1-2 paragraphs max. Be specific, practical, and motivating.
               restSeconds: 75,
               difficulty: 'beginner',
               instructions:
-                'Place feet shoulder-width on platform. Lower until 90° knee angle, press back.',
-              tips: 'Do not lock knees fully at top of movement.',
+                'Pés na largura dos ombros na plataforma. Desça até 90° de flexão nos joelhos e empurre de volta.',
+              tips: 'Não trave os joelhos completamente no topo do movimento.',
               equipment: ['machine'],
             },
             {
               id: 'ex-4-4',
-              name: 'Walking Lunges',
+              name: 'Avanço Caminhando',
               muscleGroups: ['legs', 'glutes'],
               sets: 3,
-              reps: '12 each leg',
+              reps: '12 cada perna',
               restSeconds: 75,
               difficulty: 'intermediate',
               instructions:
-                'Step forward into lunge, lower back knee near floor, drive forward with front foot.',
-              tips: 'Keep torso upright. Front knee should not pass toes.',
+                'Dê um passo à frente em posição de avanço, abaixe o joelho traseiro próximo ao chão e impulsione com o pé da frente.',
+              tips: 'Mantenha o tronco ereto. O joelho da frente não deve ultrapassar os dedos do pé.',
               equipment: ['bodyweight'],
             },
             {
               id: 'ex-4-5',
-              name: 'Leg Curl',
+              name: 'Flexão de Joelho (Leg Curl)',
               muscleGroups: ['legs'],
               sets: 3,
               reps: '12-15',
               restSeconds: 60,
               difficulty: 'beginner',
-              instructions: 'Lying face down on machine. Curl heels toward glutes, slowly return.',
-              tips: 'Full range of motion. Pause at top of movement.',
+              instructions: 'Deitado de bruços na máquina. Flex os calcanhares em direção aos glúteos e retorne devagar.',
+              tips: 'Amplitude total de movimento. Pause no topo do movimento.',
               equipment: ['machine'],
             },
           ],
         },
         {
           day: 5,
-          label: 'Friday',
-          focus: 'Full Body Power & Core',
+          label: 'Sexta',
+          focus: 'Corpo Inteiro — Potência e Core',
           isRestDay: false,
           estimatedMinutes: 50,
           exercises: [
             {
               id: 'ex-5-1',
-              name: 'Dumbbell Clean & Press',
+              name: 'Clean and Press com Halteres',
               muscleGroups: ['full_body', 'shoulders'],
               sets: 3,
               reps: '6-8',
               restSeconds: 90,
               difficulty: 'intermediate',
               instructions:
-                'Explosive pull from hang position, catch dumbbells at shoulders, press overhead.',
-              tips: 'Focus on hip drive. This is a power movement — speed is key.',
+                'Puxada explosiva da posição suspensa, receba os halteres nos ombros e pressione acima da cabeça.',
+              tips: 'Foque no impulso do quadril. É um movimento de potência — velocidade é essencial.',
               equipment: ['dumbbell'],
             },
             {
               id: 'ex-5-2',
-              name: 'Ab Wheel Rollout',
+              name: 'Roda de Abdominal (Ab Wheel)',
               muscleGroups: ['core'],
               sets: 3,
               reps: '8-12',
               restSeconds: 75,
               difficulty: 'intermediate',
               instructions:
-                'Kneel on floor. Roll wheel forward until almost parallel to floor, pull back.',
-              tips: 'Keep hips low and core braced. Do not let lower back sag.',
+                'Ajoelhe no chão. Role a roda para frente até quase ficar paralelo ao chão e puxe de volta.',
+              tips: 'Mantenha os quadris baixos e o core contraído. Não deixe a lombar ceder.',
               equipment: ['bodyweight'],
             },
             {
               id: 'ex-5-3',
-              name: 'Plank',
+              name: 'Prancha Isométrica',
               muscleGroups: ['core'],
               sets: 3,
               reps: '45-60s',
               restSeconds: 60,
               difficulty: 'beginner',
               instructions:
-                'Forearms on floor, body in straight line from head to heels. Hold.',
-              tips: 'Squeeze glutes and abs. Breathe steadily through the hold.',
+                'Antebraços no chão, corpo em linha reta da cabeça aos calcanhares. Segure a posição.',
+              tips: 'Contraia glúteos e abdômen. Respire de forma constante durante a sustentação.',
               equipment: ['bodyweight'],
             },
             {
               id: 'ex-5-4',
-              name: 'Cable Woodchop',
+              name: 'Woodchop no Cabo',
               muscleGroups: ['core'],
               sets: 3,
-              reps: '12 each side',
+              reps: '12 cada lado',
               restSeconds: 60,
               difficulty: 'intermediate',
               instructions:
-                'Set cable high. Pull diagonally across body from high to low, rotating torso.',
-              tips: 'Pivot feet and rotate through hips, not just shoulders.',
+                'Ajuste o cabo alto. Puxe diagonalmente pelo corpo de cima para baixo, rotacionando o tronco.',
+              tips: 'Gire os pés e mova o quadril, não apenas os ombros.',
               equipment: ['machine'],
             },
           ],
         },
         {
           day: 6,
-          label: 'Saturday',
-          focus: 'Cardio & Mobility',
+          label: 'Sábado',
+          focus: 'Cardio e Mobilidade',
           isRestDay: true,
           estimatedMinutes: 30,
           exercises: [],
         },
         {
           day: 7,
-          label: 'Sunday',
-          focus: 'Full Rest',
+          label: 'Domingo',
+          focus: 'Descanso Total',
           isRestDay: true,
           estimatedMinutes: 0,
           exercises: [],
@@ -654,3 +663,4 @@ Respond in 1-2 paragraphs max. Be specific, practical, and motivating.
     };
   }
 }
+

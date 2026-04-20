@@ -10,17 +10,10 @@ import {
   WorkoutSession,
 } from '../models';
 
-/**
- * Single source of truth for application state.
- *
- * Rules:
- *  - BehaviorSubjects are PRIVATE — agents/services mutate state via setters.
- *  - Public API exposes only read-only Observables (`asObservable()`).
- *  - Snapshot getters (`getCurrent*`) avoid exposing the raw subjects.
- */
+
 @Injectable({ providedIn: 'root' })
 export class StateService {
-  // ─── Private Subjects ──────────────────────────────────────────────────────
+  
 
   private readonly _user = new BehaviorSubject<UserProfile | null>(null);
   private readonly _workoutPlan = new BehaviorSubject<WorkoutPlan | null>(null);
@@ -45,7 +38,7 @@ export class StateService {
   private readonly _chatMessages = new BehaviorSubject<ChatMessage[]>([]);
   private readonly _error = new BehaviorSubject<string | null>(null);
 
-  // ─── Public Read-Only Streams ──────────────────────────────────────────────
+  
 
   readonly user$: Observable<UserProfile | null> = this._user.asObservable();
   readonly workoutPlan$: Observable<WorkoutPlan | null> = this._workoutPlan.asObservable();
@@ -58,7 +51,7 @@ export class StateService {
   readonly chatMessages$: Observable<ChatMessage[]> = this._chatMessages.asObservable();
   readonly error$: Observable<string | null> = this._error.asObservable();
 
-  // ─── Snapshot Getters (current values without subscribing) ────────────────
+  
 
   getCurrentUser(): UserProfile | null {
     return this._user.getValue();
@@ -80,7 +73,7 @@ export class StateService {
     return this._progress.getValue();
   }
 
-  // ─── Setters (called ONLY by agents and services) ─────────────────────────
+  
 
   setUser(user: UserProfile | null): void {
     this._user.next(user);
@@ -114,26 +107,30 @@ export class StateService {
     this._error.next(error);
   }
 
-  // ─── Agent Decision Log ────────────────────────────────────────────────────
+  
 
   addAgentDecision(decision: AgentDecision): void {
     const current = this._agentDecisions.getValue();
-    // Keep at most 50 decisions (newest first)
-    this._agentDecisions.next([decision, ...current].slice(0, 50));
+    
+    
+    
+    queueMicrotask(() => {
+      this._agentDecisions.next([decision, ...current].slice(0, 50));
+    });
   }
 
   clearAgentDecisions(): void {
     this._agentDecisions.next([]);
   }
 
-  // ─── Chat ─────────────────────────────────────────────────────────────────
+  
 
   addChatMessage(message: ChatMessage): void {
     const current = this._chatMessages.getValue();
     this._chatMessages.next([...current, message]);
   }
 
-  /** Updates the last message in place — used for streaming token accumulation */
+  
   updateLastChatMessage(content: string, isStreaming: boolean = false): void {
     const current = this._chatMessages.getValue();
     if (current.length === 0) return;
@@ -146,3 +143,4 @@ export class StateService {
     this._chatMessages.next([]);
   }
 }
+

@@ -4,10 +4,7 @@ import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { UserProfile, WorkoutPlan, WorkoutSession } from '../models';
 
-/**
- * FirestoreService — Firestore data persistence ONLY.
- * No authentication logic — that belongs to AuthService.
- */
+
 @Injectable({ providedIn: 'root' })
 export class FirestoreService {
   private db: import('firebase/firestore').Firestore | null = null;
@@ -19,7 +16,7 @@ export class FirestoreService {
     return this.db;
   }
 
-  // ─── User Profile ─────────────────────────────────────────────────────────
+  
 
   saveUserProfile(profile: UserProfile): Observable<void> {
     if (!this.isConfigured()) return of(undefined);
@@ -44,7 +41,7 @@ export class FirestoreService {
     ).pipe(catchError(() => of(null)));
   }
 
-  // ─── Workout Plan ─────────────────────────────────────────────────────────
+  
 
   saveWorkoutPlan(plan: WorkoutPlan): Observable<void> {
     if (!this.isConfigured()) return of(undefined);
@@ -77,7 +74,7 @@ export class FirestoreService {
     ).pipe(catchError(() => of(null)));
   }
 
-  // ─── Sessions ─────────────────────────────────────────────────────────────
+  
 
   saveSession(session: WorkoutSession): Observable<void> {
     if (!this.isConfigured()) return of(undefined);
@@ -110,9 +107,9 @@ export class FirestoreService {
     ).pipe(catchError(() => of([])));
   }
 
-  // ─── Private Helpers ──────────────────────────────────────────────────────
+  
 
-  /** Converts Date fields to ISO strings for Firestore */
+  
   private toFirestore(obj: unknown): Record<string, unknown> {
     return JSON.parse(
       JSON.stringify(obj, (_key, value) =>
@@ -128,3 +125,4 @@ export class FirestoreService {
     );
   }
 }
+

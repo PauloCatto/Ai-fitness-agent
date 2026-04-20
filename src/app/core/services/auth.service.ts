@@ -5,10 +5,7 @@ import { environment } from '../../../environments/environment';
 import { UserProfile } from '../models';
 import { StateService } from '../state/state.service';
 
-/**
- * AuthService — Firebase Authentication ONLY.
- * Does not touch Firestore or application state beyond the current user.
- */
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private auth: import('firebase/auth').Auth | null = null;
@@ -23,7 +20,7 @@ export class AuthService {
     return this.auth;
   }
 
-  // ─── Public API ────────────────────────────────────────────────────────────
+  
 
   signInWithGoogle(): Observable<UserProfile> {
     if (!this.isFirebaseConfigured()) {
@@ -61,18 +58,24 @@ export class AuthService {
     );
   }
 
-  /** Activates demo mode — sets a mock user without Firebase */
+  
   signInAsDemo(): void {
     const demoUser: UserProfile = {
       uid: 'demo-user-001',
-      displayName: 'Demo Athlete',
+      displayName: 'Atleta Demo',
       email: 'demo@ai-fitness-agent.dev',
       photoURL: undefined,
       fitnessLevel: 'intermediate',
-      goals: ['muscle gain', 'strength', 'endurance'],
+      goals: ['hypertrophy'],
+      goal: 'hypertrophy',
+      age: 30,
+      weight: 75,
+      limitations: [],
+      injuries: '',
+      onboardingCompleted: false,
       createdAt: new Date(),
       preferences: {
-        daysPerWeek: 5,
+        daysPerWeek: 4,
         sessionDurationMinutes: 55,
         availableEquipment: ['barbell', 'dumbbell', 'machine', 'bodyweight'],
         focusAreas: ['chest', 'back', 'legs', 'core'],
@@ -81,7 +84,7 @@ export class AuthService {
     this.state.setUser(demoUser);
   }
 
-  // ─── Private Helpers ──────────────────────────────────────────────────────
+  
 
   private async googleSignIn(): Promise<import('firebase/auth').User> {
     const auth = await this.getAuth();
@@ -104,11 +107,17 @@ export class AuthService {
   private mapFirebaseUser(fbUser: import('firebase/auth').User): UserProfile {
     return {
       uid: fbUser.uid,
-      displayName: fbUser.displayName ?? 'Athlete',
+      displayName: fbUser.displayName ?? 'Atleta',
       email: fbUser.email ?? '',
       photoURL: fbUser.photoURL ?? undefined,
       fitnessLevel: 'intermediate',
-      goals: ['general fitness'],
+      goals: ['hypertrophy'],
+      goal: 'hypertrophy',
+      age: 30,
+      weight: 75,
+      limitations: [],
+      injuries: '',
+      onboardingCompleted: false,
       createdAt: new Date(),
       preferences: {
         daysPerWeek: 4,
@@ -126,3 +135,4 @@ export class AuthService {
     );
   }
 }
+
