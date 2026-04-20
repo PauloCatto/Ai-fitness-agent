@@ -23,11 +23,11 @@ export class LoginComponent {
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
-  isLoading = false;
-  errorMessage = '';
-  showEmailForm = false;
+  isLoading: boolean = false;
+  errorMessage: string = '';
+  showEmailForm: boolean = false;
 
-  /** Demo mode — no Firebase required */
+
   enterDemoMode(): void {
     this.auth.signInAsDemo();
     this.router.navigate(['/workout']);
@@ -71,3 +71,4 @@ export class LoginComponent {
     });
   }
 }
+
