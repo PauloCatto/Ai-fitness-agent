@@ -5,7 +5,7 @@
   overflow: hidden;
 }
 
-// ─── Header ──────────────────────────────────────────────────────────────────
+
 
 .chat-header {
   padding: 1.5rem 2rem 1rem;
@@ -46,7 +46,7 @@
   margin: 0;
 }
 
-// ─── Messages ─────────────────────────────────────────────────────────────────
+
 
 .messages-container {
   flex: 1;
@@ -111,7 +111,7 @@
   }
 }
 
-// ─── Message Bubbles ─────────────────────────────────────────────────────────
+
 
 .message-row {
   display: flex;
@@ -200,7 +200,7 @@
   text-align: right;
 }
 
-// ─── Input ────────────────────────────────────────────────────────────────────
+
 
 .chat-input-area {
   flex-shrink: 0;
@@ -270,3 +270,4 @@
   margin: 0.5rem 0 0;
   padding-left: 0.25rem;
 }
+

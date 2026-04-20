@@ -24,13 +24,13 @@ export class ChatComponent implements AfterViewChecked {
   private shouldScrollToBottom = false;
 
   readonly sampleQuestions = [
-    'How can I improve my squat form?',
-    'What should I eat before a workout?',
-    'How much rest do I need between sets?',
-    'Can you explain progressive overload?',
+    'Como posso melhorar minha postura no agachamento?',
+    'O que devo comer antes do treino?',
+    'Quanto descanso preciso entre as séries?',
+    'Pode me explicar o que é sobrecarga progressiva?',
   ];
 
-  // ─── User Actions ──────────────────────────────────────────────────────────
+  
 
   sendMessage(): void {
     if (!this.inputMessage.trim()) return;
@@ -66,3 +66,4 @@ export class ChatComponent implements AfterViewChecked {
     } catch {}
   }
 }
+

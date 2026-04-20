@@ -1,23 +1,23 @@
 <div class="chat-page">
-  <!-- Header -->
+  
   <header class="chat-header">
     <div class="chat-brand">
       <div class="ai-dot"></div>
       <div>
-        <h1>AI Coach</h1>
-        <p class="chat-subtitle">Ask anything about fitness, nutrition, or your plan</p>
+        <h1>Coach de IA</h1>
+        <p class="chat-subtitle">Pergunte qualquer coisa sobre treino, nutrição ou seu plano</p>
       </div>
     </div>
   </header>
 
-  <!-- Messages -->
+  
   <div class="messages-container" #messagesContainer>
     @if ((messages$ | async)?.length === 0) {
-      <!-- Welcome state -->
+      
       <div class="welcome-state">
         <div class="welcome-icon">🤖</div>
-        <h2>Ready to coach you</h2>
-        <p>Ask me anything about your workout plan, nutrition, or fitness goals.</p>
+        <h2>Pronto para te orientar</h2>
+        <p>Pergunte sobre seu plano de treino, nutrição ou suas metas de condicionamento.</p>
 
         <div class="sample-questions">
           @for (question of sampleQuestions; track question) {
@@ -50,7 +50,7 @@
     }
   </div>
 
-  <!-- Input Area -->
+  
   <div class="chat-input-area">
     <div class="input-wrapper">
       <textarea
@@ -58,7 +58,7 @@
         class="chat-textarea"
         [(ngModel)]="inputMessage"
         (keydown)="onKeyDown($event)"
-        placeholder="Ask your AI coach anything..."
+        placeholder="Pergunte qualquer coisa ao seu coach de IA..."
         rows="1"
         autocomplete="off">
       </textarea>
@@ -73,6 +73,7 @@
         </svg>
       </button>
     </div>
-    <p class="input-hint">Press Enter to send · Shift+Enter for new line</p>
+    <p class="input-hint">Enter para enviar · Shift+Enter para nova linha</p>
   </div>
 </div>
+
