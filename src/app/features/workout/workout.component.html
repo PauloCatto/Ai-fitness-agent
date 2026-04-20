@@ -1,0 +1,171 @@
+<div class="workout-page">
+
+  <!-- Loading Overlay -->
+  @if (isLoading$ | async) {
+    <app-loading-spinner
+      message="AI is building your personalized plan..."
+      [fullscreen]="true">
+    </app-loading-spinner>
+  }
+
+  @if (plan$ | async; as plan) {
+    <!-- Plan Header -->
+    <header class="workout-header">
+      <div class="header-left">
+        <div class="plan-badge">
+          <span class="badge-dot"></span>
+          Week {{ plan.weekNumber }} · {{ plan.fitnessLevel | titlecase }}
+        </div>
+        <h1>Your Training Plan</h1>
+        <p class="header-subtitle">
+          {{ getTrainingDaysCount(plan.days) }} training days ·
+          {{ plan.estimatedWeeklyMinutes | duration }} per week
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <button
+          id="btn-toggle-reasoning"
+          class="btn-ghost-sm"
+          (click)="toggleReasoning()">
+          {{ showReasoning ? 'Hide' : 'AI Reasoning' }}
+        </button>
+        <button
+          id="btn-regenerate"
+          class="btn-accent-sm"
+          (click)="generatePlan()">
+          ↺ Regenerate
+        </button>
+      </div>
+    </header>
+
+    <!-- AI Reasoning Panel -->
+    @if (showReasoning) {
+      <div class="reasoning-panel">
+        <div class="reasoning-icon">🤖</div>
+        <p>{{ plan.agentReasoning }}</p>
+      </div>
+    }
+
+    <!-- Fatigue Banner -->
+    @if (fatigue$ | async; as fatigue) {
+      @if (fatigue.score >= 5) {
+        <div class="fatigue-banner" [class.warning]="fatigue.score < 8" [class.danger]="fatigue.score >= 8">
+          @if (fatigue.score >= 8) {
+            ⛔ High fatigue detected ({{ fatigue.score }}/10) — Rest day recommended
+          } @else {
+            ⚠️ Moderate fatigue ({{ fatigue.score }}/10) — Consider a lighter session
+          }
+        </div>
+      }
+    }
+
+    <!-- Day Tabs -->
+    <div class="day-tabs" role="tablist">
+      @for (day of plan.days; track trackByDay($index, day); let i = $index) {
+        <button
+          class="day-tab"
+          role="tab"
+          [class.active]="selectedDayIndex === i"
+          [class.rest]="day.isRestDay"
+          [attr.aria-selected]="selectedDayIndex === i"
+          [id]="'tab-day-' + i"
+          (click)="selectDay(i)">
+          <span class="tab-label">{{ day.label.substring(0, 3) }}</span>
+          <span class="tab-indicator" [class.rest]="day.isRestDay"></span>
+        </button>
+      }
+    </div>
+
+    <!-- Selected Day Content -->
+    @if (getSelectedDay(plan.days); as day) {
+      <div class="day-content">
+        <div class="day-header">
+          <div>
+            <h2 class="day-title">{{ day.label }}</h2>
+            <p class="day-focus">{{ day.focus }}</p>
+          </div>
+          @if (!day.isRestDay) {
+            <div class="day-duration">
+              <span class="duration-icon">⏱</span>
+              {{ day.estimatedMinutes | duration }}
+            </div>
+          }
+        </div>
+
+        @if (day.isRestDay) {
+          <!-- Rest Day -->
+          <div class="rest-day-card">
+            <div class="rest-icon">🌙</div>
+            <h3>Rest & Recovery Day</h3>
+            <p>Your muscles repair and grow stronger during rest. Consider light stretching, walking, or foam rolling to aid recovery.</p>
+          </div>
+        } @else {
+          <!-- Exercise List -->
+          <div class="exercise-list">
+            @for (exercise of day.exercises; track exercise.id; let i = $index) {
+              <div class="exercise-wrapper">
+                <div class="exercise-number">{{ i + 1 }}</div>
+                <app-exercise-card [exercise]="exercise" class="exercise-card-full" />
+              </div>
+            }
+          </div>
+
+          <!-- Session Feedback -->
+          @if (!sessionFeedbackSent) {
+            <div class="feedback-section">
+              <h3 class="feedback-title">How was today's workout?</h3>
+              <div class="feedback-buttons">
+                <button
+                  id="btn-feedback-easy"
+                  class="feedback-btn easy"
+                  (click)="submitFeedback('too_easy')">
+                  😴 Too Easy
+                </button>
+                <button
+                  id="btn-feedback-done"
+                  class="feedback-btn done"
+                  (click)="submitFeedback('just_right')">
+                  ✅ Just Right
+                </button>
+                <button
+                  id="btn-feedback-hard"
+                  class="feedback-btn hard"
+                  (click)="submitFeedback('too_hard')">
+                  🔥 Too Hard
+                </button>
+              </div>
+            </div>
+          } @else {
+            <div class="feedback-sent">
+              <span class="feedback-sent-icon">🎯</span>
+              <div>
+                <p class="feedback-sent-title">Feedback received!</p>
+                <p class="feedback-sent-sub">Our AI agents are analysing your session and may adjust your plan.</p>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    }
+
+  } @else {
+
+    <!-- Empty State -->
+    @if (!(isLoading$ | async)) {
+      <div class="empty-state">
+        <div class="empty-icon">🏋️</div>
+        <h2>No workout plan yet</h2>
+        <p>Let our AI generate a personalized plan based on your profile</p>
+        <button id="btn-generate-plan" class="btn-primary-lg" (click)="generatePlan()">
+          <span>⚡</span> Generate My Plan
+        </button>
+      </div>
+    }
+  }
+
+  <!-- Error State -->
+  @if (error$ | async; as err) {
+    <div class="error-bar">⚠ {{ err }}</div>
+  }
+</div>
