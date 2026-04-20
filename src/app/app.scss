@@ -9,7 +9,7 @@
   overflow: hidden;
 }
 
-// ─── Sidebar ─────────────────────────────────────────────────────────────────
+
 
 .sidebar {
   width: 256px;
@@ -23,7 +23,7 @@
   overflow: hidden;
 }
 
-// ─── Logo ─────────────────────────────────────────────────────────────────────
+
 
 .sidebar-logo {
   display: flex;
@@ -65,7 +65,7 @@
   letter-spacing: 0.08em;
 }
 
-// ─── Navigation ───────────────────────────────────────────────────────────────
+
 
 .sidebar-nav {
   display: flex;
@@ -115,7 +115,7 @@
   50% { transform: scale(1.3); opacity: 0.7; }
 }
 
-// ─── Fatigue Widget ───────────────────────────────────────────────────────────
+
 
 .fatigue-widget {
   background: var(--card);
@@ -157,11 +157,11 @@
   margin: 0;
 }
 
-// ─── Spacer ───────────────────────────────────────────────────────────────────
+
 
 .sidebar-spacer { flex: 1; }
 
-// ─── Agent Activity ────────────────────────────────────────────────────────
+
 
 .agent-activity {
   display: flex;
@@ -185,7 +185,7 @@
   50% { opacity: 0.3; }
 }
 
-// ─── User Section ─────────────────────────────────────────────────────────────
+
 
 .sidebar-user {
   display: flex;
@@ -253,10 +253,11 @@
   }
 }
 
-// ─── Main Content ────────────────────────────────────────────────────────────
+
 
 .main-content {
   flex: 1;
   overflow-y: auto;
   background: var(--bg);
 }
+

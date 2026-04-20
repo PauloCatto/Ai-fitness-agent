@@ -1,49 +1,49 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-// ─── Design Tokens ────────────────────────────────────────────────────────────
+
 
 :root {
-  // Backgrounds
+  
   --bg: #0D0D14;
   --surface: #111118;
   --surface-2: #18181F;
 
-  // Cards
+  
   --card: rgba(255, 255, 255, 0.03);
   --card-hover: rgba(255, 255, 255, 0.055);
 
-  // Borders
+  
   --border: rgba(255, 255, 255, 0.07);
   --border-hover: rgba(255, 255, 255, 0.13);
 
-  // Accent — Lime (energy / training)
+  
   --accent: #A3E635;
   --accent-dim: rgba(163, 230, 53, 0.1);
   --accent-glow: rgba(163, 230, 53, 0.22);
 
-  // AI Accent — Indigo (intelligence / AI)
+  
   --ai: #818CF8;
   --ai-dim: rgba(129, 140, 248, 0.1);
   --ai-glow: rgba(129, 140, 248, 0.22);
 
-  // Status
+  
   --success: #4ADE80;
   --warning: #FBBF24;
   --error: #F87171;
 
-  // Text
+  
   --text-1: #F1F5F9;
   --text-2: #94A3B8;
   --text-3: #475569;
 
-  // Border radii
+  
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 24px;
 }
 
-// ─── Reset ────────────────────────────────────────────────────────────────────
+
 
 *,
 *::before,
@@ -68,7 +68,7 @@ body {
   line-height: 1.5;
 }
 
-// ─── Typography ───────────────────────────────────────────────────────────────
+
 
 h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
@@ -88,7 +88,7 @@ button {
   cursor: pointer;
 }
 
-// ─── Scrollbar ────────────────────────────────────────────────────────────────
+
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -98,21 +98,21 @@ button {
 }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.14); }
 
-// ─── View Transitions ─────────────────────────────────────────────────────────
+
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: 0.25s;
 }
 
-// ─── Selection ────────────────────────────────────────────────────────────────
+
 
 ::selection {
   background: var(--accent-glow);
   color: var(--text-1);
 }
 
-// ─── Utility ─────────────────────────────────────────────────────────────────
+
 
 .sr-only {
   position: absolute;
@@ -123,7 +123,7 @@ button {
   white-space: nowrap;
 }
 
-// ─── Professional UI Pack ────────────────────────────────────────────────────
+
 
 .bg-glow {
   position: fixed;
@@ -187,3 +187,4 @@ button {
     transform: translateY(0);
   }
 }
+

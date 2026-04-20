@@ -16,7 +16,8 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(),
     provideAnimationsAsync(),
-    // Firebase is initialized lazily inside AuthService and FirestoreService
-    // when environment keys are configured
+    
+    
   ],
 };
+

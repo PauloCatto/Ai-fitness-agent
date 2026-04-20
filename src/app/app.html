@@ -1,9 +1,9 @@
 @if (user$ | async; as user) {
   <div class="bg-glow"></div>
   <div class="app-shell">
-    <!-- Menu Lateral -->
+    
     <aside class="sidebar">
-      <!-- Logo -->
+      
       <div class="sidebar-logo">
         <div class="logo-icon">
           <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
@@ -17,7 +17,7 @@
         </div>
       </div>
 
-      <!-- Navegação -->
+      
       <nav class="sidebar-nav">
         <a
           id="nav-workout"
@@ -48,7 +48,7 @@
         </a>
       </nav>
 
-      <!-- Indicador de Fadiga -->
+      
       @if (fatigue$ | async; as fatigue) {
         <div class="fatigue-widget">
           <div class="fatigue-label">
@@ -66,7 +66,7 @@
 
       <div class="sidebar-spacer"></div>
 
-      <!-- Badge de Atividade dos Agentes -->
+      
       @if (agentDecisions$ | async; as decisions) {
         @if (decisions.length > 0) {
           <div class="agent-activity">
@@ -76,7 +76,7 @@
         }
       }
 
-      <!-- Usuário -->
+      
       <div class="sidebar-user">
         <div class="user-avatar">{{ user.displayName.charAt(0).toUpperCase() }}</div>
         <div class="user-info">
@@ -93,12 +93,13 @@
       </div>
     </aside>
 
-    <!-- Conteúdo Principal -->
+    
     <main class="main-content">
       <router-outlet />
     </main>
   </div>
 } @else {
-  <!-- Não autenticado: exibe apenas a tela de login -->
+  
   <router-outlet />
 }
+
