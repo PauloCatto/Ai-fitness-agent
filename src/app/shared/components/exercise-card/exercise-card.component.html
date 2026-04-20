@@ -1,0 +1,55 @@
+<div class="exercise-card" [class.expanded]="isExpanded">
+  
+  <div class="card-header" (click)="toggle()">
+    <div class="card-title-row">
+      <div class="exercise-info">
+        <span class="difficulty-dot" [class]="exercise.difficulty"></span>
+        <h3 class="exercise-name">{{ exercise.name }}</h3>
+      </div>
+      <span class="expand-icon" [class.rotated]="isExpanded">›</span>
+    </div>
+
+    <div class="card-meta">
+      <div class="meta-chips">
+        @for (group of exercise.muscleGroups; track group) {
+          <span class="muscle-chip">{{ group | titlecase }}</span>
+        }
+      </div>
+      <div class="sets-reps">
+        <span class="metric">
+          <strong>{{ exercise.sets }}</strong> sets
+        </span>
+        <span class="divider">×</span>
+        <span class="metric">
+          <strong>{{ exercise.reps }}</strong> reps
+        </span>
+        <span class="divider">·</span>
+        <span class="metric rest">{{ exercise.restSeconds }}s rest</span>
+      </div>
+    </div>
+  </div>
+
+  
+  @if (isExpanded) {
+    <div class="card-body">
+      <div class="instructions-block">
+        <p class="label">Instructions</p>
+        <p class="instructions-text">{{ exercise.instructions }}</p>
+      </div>
+
+      @if (exercise.tips) {
+        <div class="tips-block">
+          <p class="label">💡 Coach Tip</p>
+          <p class="tips-text">{{ exercise.tips }}</p>
+        </div>
+      }
+
+      <div class="equipment-row">
+        @for (eq of exercise.equipment; track eq) {
+          <span class="equipment-badge">{{ eq | titlecase }}</span>
+        }
+      </div>
+    </div>
+  }
+</div>
+

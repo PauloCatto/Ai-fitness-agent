@@ -1,0 +1,303 @@
+<div class="workout-page">
+  
+  @if (isLoading$ | async) {
+    <div class="loading-state">
+      <div class="skeleton-header">
+        <app-skeleton width="250px" height="2.5rem" radius="var(--radius-md)"></app-skeleton>
+        <app-skeleton width="180px" height="1.25rem" style="margin-top: 1rem"></app-skeleton>
+      </div>
+      
+      <div class="day-tabs-skeleton">
+        @for (i of [1,2,3,4,5]; track i) {
+          <app-skeleton width="80px" height="40px" radius="20px"></app-skeleton>
+        }
+      </div>
+
+      <div class="exercise-list-skeleton">
+        @for (i of [1,2,3]; track i) {
+          <app-skeleton height="120px" radius="var(--radius-lg)" style="margin-bottom: 1.5rem"></app-skeleton>
+        }
+      </div>
+    </div>
+  }
+
+  @if (user$ | async; as user) {
+    <section class="athlete-context glass" [class.editing]="isEditingProfile">
+      
+      @if (!isEditingProfile) {
+        <div class="context-header stagger-in">
+          <div class="context-badges">
+            <div class="context-card glass">
+              <span class="context-icon">🎯</span>
+              <div class="context-info">
+                <span class="context-label">Objetivo</span>
+                <span class="context-value">{{ getGoalLabel(user.goal) }}</span>
+              </div>
+            </div>
+
+            <div class="context-card glass">
+              <span class="context-icon">⚡</span>
+              <div class="context-info">
+                <span class="context-label">Nível</span>
+                <span class="context-value">{{ getFitnessLevelLabel(user.fitnessLevel) }}</span>
+              </div>
+            </div>
+
+            <div class="context-card glass">
+              <span class="context-icon">📅</span>
+              <div class="context-info">
+                <span class="context-label">Frequência</span>
+                <span class="context-value">{{ user.preferences.daysPerWeek }}x / semana</span>
+              </div>
+            </div>
+
+            <div class="context-card bio glass">
+              <span class="context-icon">👤</span>
+              <div class="context-info">
+                <span class="context-label">Perfil</span>
+                <span class="context-value">{{ user.age }} anos · {{ user.weight }}kg</span>
+              </div>
+            </div>
+
+            @if (user.limitations.length > 0) {
+              <div class="context-card limitation glass">
+                <span class="context-icon">⚠️</span>
+                <div class="context-info">
+                  <span class="context-label">Limitações</span>
+                  <div class="limitation-tags">
+                    @for (lim of user.limitations; track lim) {
+                      <span class="limitation-tag">{{ lim | titlecase }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+          <button class="btn-edit-profile" (click)="toggleEdit()">
+            <span>✏️</span> Editar
+          </button>
+        </div>
+      } @else {
+        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="edit-profile-form stagger-in">
+          <div class="form-grid">
+            <div class="form-field">
+              <label>Nome</label>
+              <input type="text" formControlName="displayName">
+            </div>
+            <div class="form-field">
+              <label>Idade</label>
+              <input type="number" formControlName="age">
+            </div>
+            <div class="form-field">
+              <label>Peso (kg)</label>
+              <input type="number" formControlName="weight">
+            </div>
+            <div class="form-field">
+              <label>Objetivo</label>
+              <select formControlName="goal">
+                <option value="hypertrophy">Hipertrofia</option>
+                <option value="strength">Força</option>
+                <option value="weight_loss">Emagrecimento</option>
+                <option value="endurance">Resistência</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Nível</label>
+              <select formControlName="fitnessLevel">
+                <option value="beginner">Iniciante</option>
+                <option value="intermediate">Intermediário</option>
+                <option value="advanced">Avançado</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Frequência (dias)</label>
+              <select formControlName="daysPerWeek">
+                <option [value]="2">2 dias</option>
+                <option [value]="3">3 dias</option>
+                <option [value]="4">4 dias</option>
+                <option [value]="5">5 dias</option>
+                <option [value]="6">6 dias</option>
+              </select>
+            </div>
+            <div class="form-field full-width">
+              <label>Limitações Físicas</label>
+              <div class="checkbox-grid">
+                @for (lim of availableLimitations; track lim) {
+                  <div class="checkbox-item" 
+                       [class.active]="isLimitationSelected(lim)"
+                       (click)="toggleLimitation(lim)">
+                    <span class="checkbox-label">{{ lim | titlecase }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn-cancel" (click)="toggleEdit()">Cancelar</button>
+            <button type="submit" class="btn-save" [disabled]="profileForm.invalid">Salvar e Regenerar Treino ⚡</button>
+          </div>
+        </form>
+      }
+    </section>
+  }
+
+  @if (plan$ | async; as plan) {
+    <header class="workout-header stagger-in">
+      <div class="header-left">
+        <div class="plan-badge">
+          <span class="badge-dot"></span>
+          Semana {{ plan.weekNumber }} · {{ getFitnessLevelLabel(plan.fitnessLevel) }}
+        </div>
+        <h1>Seu Plano de Treino</h1>
+        <p class="header-subtitle">
+          {{ getTrainingDaysCount(plan.days) }} dias de treino ·
+          {{ plan.estimatedWeeklyMinutes | duration }} por semana
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <button
+          id="btn-toggle-reasoning"
+          class="btn-ghost-sm"
+          (click)="toggleReasoning()">
+          {{ showReasoning ? 'Ocultar Raciocínio' : 'Raciocínio da IA' }}
+        </button>
+        <button
+          id="btn-regenerate"
+          class="btn-accent-sm"
+          (click)="generatePlan()">
+          ↺ Regenerar
+        </button>
+      </div>
+    </header>
+
+    @if (showReasoning) {
+      <div class="reasoning-panel glass stagger-in">
+        <div class="reasoning-icon">🤖</div>
+        <p>{{ plan.agentReasoning }}</p>
+      </div>
+    }
+
+    
+    @if (fatigue$ | async; as fatigue) {
+      @if (fatigue.score >= 5) {
+        <div class="fatigue-banner stagger-in" [class.warning]="fatigue.score < 8" [class.danger]="fatigue.score >= 8">
+          @if (fatigue.score >= 8) {
+            ⛔ Fadiga elevada detectada ({{ fatigue.score }}/10) — Dia de descanso recomendado
+          } @else {
+            ⚠️ Fadiga moderada ({{ fatigue.score }}/10) — Considere uma sessão mais leve
+          }
+        </div>
+      }
+    }
+
+    
+    <div class="day-tabs stagger-in" role="tablist">
+      @for (day of plan.days; track trackByDay($index, day); let i = $index) {
+        <button
+          class="day-tab"
+          role="tab"
+          [class.active]="selectedDayIndex === i"
+          [class.rest]="day.isRestDay"
+          [attr.aria-selected]="selectedDayIndex === i"
+          [id]="'tab-day-' + i"
+          (click)="selectDay(i)">
+          <span class="tab-label">{{ day.label.substring(0, 3) }}</span>
+          <span class="tab-indicator" [class.rest]="day.isRestDay"></span>
+        </button>
+      }
+    </div>
+
+    
+    @if (getSelectedDay(plan.days); as day) {
+      <div class="day-content stagger-in">
+        <div class="day-header">
+          <div>
+            <h2 class="day-title">{{ day.label }}</h2>
+            <p class="day-focus">{{ day.focus }}</p>
+          </div>
+          @if (!day.isRestDay) {
+            <div class="day-duration">
+              <span class="duration-icon">⏱</span>
+              {{ day.estimatedMinutes | duration }}
+            </div>
+          }
+        </div>
+
+        @if (day.isRestDay) {
+          
+          <div class="rest-day-card glass stagger-in">
+            <div class="rest-icon">🌙</div>
+            <h3>Dia de Descanso e Recuperação</h3>
+            <p>Seus músculos se reparam e ficam mais fortes durante o repouso. Considere alongamentos leves, caminhada ou rolo de liberação miofascial.</p>
+          </div>
+        } @else {
+          
+          <div class="exercise-list">
+            @for (exercise of day.exercises; track exercise.id; let i = $index) {
+              <div class="exercise-wrapper stagger-in" [style.animation-delay]="i * 0.05 + 's'">
+                <div class="exercise-number">{{ i + 1 }}</div>
+                <app-exercise-card [exercise]="exercise" class="exercise-card-full" />
+              </div>
+            }
+          </div>
+
+          
+          @if (!sessionFeedbackSent) {
+            <div class="feedback-section glass stagger-in">
+              <h3 class="feedback-title">Como foi o treino de hoje?</h3>
+              <div class="feedback-buttons">
+                <button
+                  id="btn-feedback-easy"
+                  class="feedback-btn easy"
+                  (click)="submitFeedback('too_easy')">
+                  😴 Muito Fácil
+                </button>
+                <button
+                  id="btn-feedback-done"
+                  class="feedback-btn done"
+                  (click)="submitFeedback('just_right')">
+                  ✅ Na Medida Certa
+                </button>
+                <button
+                  id="btn-feedback-hard"
+                  class="feedback-btn hard"
+                  (click)="submitFeedback('too_hard')">
+                  🔥 Muito Difícil
+                </button>
+              </div>
+            </div>
+          } @else {
+            <div class="feedback-sent stagger-in">
+              <span class="feedback-sent-icon">🎯</span>
+              <div>
+                <p class="feedback-sent-title">Feedback recebido!</p>
+                <p class="feedback-sent-sub">Nossos agentes de IA estão analisando sua sessão e podem ajustar seu plano.</p>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    }
+
+  } @else {
+
+    
+    @if (!(isLoading$ | async)) {
+      <div class="empty-state">
+        <div class="empty-icon">🏋️</div>
+        <h2>Nenhum plano de treino ainda</h2>
+        <p>Deixe nossa IA gerar um plano personalizado com base no seu perfil</p>
+        <button id="btn-generate-plan" class="btn-primary-lg" (click)="generatePlan()">
+          <span>⚡</span> Gerar Meu Plano
+        </button>
+      </div>
+    }
+  }
+
+  
+  @if (error$ | async; as err) {
+    <div class="error-bar">⚠ {{ err }}</div>
+  }
+</div>
+
