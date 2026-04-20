@@ -1,43 +1,42 @@
 @if (vm$ | async; as vm) {
-<div class="dashboard-page">
+<div class="dashboard-page stagger-in">
 
-  <!-- Header -->
+  
   <header class="dash-header">
-    <h1>Dashboard</h1>
-    <p class="dash-subtitle">Your fitness insights at a glance</p>
+    <h1>Painel</h1>
+    <p class="dash-subtitle">Seus dados de treino em um só lugar</p>
   </header>
 
-  <!-- Stats Grid -->
+  
   <div class="stats-grid">
-    <!-- Consistency -->
-    <div class="stat-card">
+    
+    <div class="stat-card glass">
       <div class="stat-top">
         <span class="stat-icon">📅</span>
         <span class="stat-trend" [class.positive]="vm.progress.weeklyConsistency >= 60">
-          {{ vm.progress.weeklyConsistency >= 60 ? '↑' : '↓' }}
-          {{ vm.progress.weeklyConsistency >= 60 ? 'On Track' : 'Needs Work' }}
+          {{ vm.progress.weeklyConsistency >= 60 ? '↑ Em dia' : '↓ Precisa melhorar' }}
         </span>
       </div>
       <div class="stat-value">{{ vm.progress.weeklyConsistency }}%</div>
-      <div class="stat-label">Weekly Consistency</div>
+      <div class="stat-label">Consistência Semanal</div>
       <div class="stat-bar">
         <div class="stat-bar-fill" [style.width.%]="vm.progress.weeklyConsistency"></div>
       </div>
     </div>
 
-    <!-- Fatigue Score -->
-    <div class="stat-card">
+    
+    <div class="stat-card glass">
       <div class="stat-top">
         <span class="stat-icon">⚡</span>
         <span class="stat-badge" [style.color]="getFatigueColor(vm.fatigue.score)">
-          {{ vm.fatigue.recommendation === 'rest' ? 'Rest' :
-             vm.fatigue.recommendation === 'light_session' ? 'Light' : 'Train' }}
+          {{ vm.fatigue.recommendation === 'rest' ? 'Descansar' :
+             vm.fatigue.recommendation === 'light_session' ? 'Sessão Leve' : 'Pronto para Treinar' }}
         </span>
       </div>
       <div class="stat-value" [style.color]="getFatigueColor(vm.fatigue.score)">
         {{ vm.fatigue.score }}/10
       </div>
-      <div class="stat-label">Fatigue Score</div>
+      <div class="stat-label">Índice de Fadiga</div>
       <div class="stat-bar">
         <div class="stat-bar-fill fatigue"
              [style.width.%]="vm.fatigue.score * 10"
@@ -46,18 +45,18 @@
       </div>
     </div>
 
-    <!-- Sessions Completed -->
-    <div class="stat-card">
+    
+    <div class="stat-card glass">
       <div class="stat-top">
         <span class="stat-icon">🏆</span>
-        <span class="stat-badge positive">{{ vm.progress.streak }} day streak</span>
+        <span class="stat-badge positive">{{ vm.progress.streak }} dias seguidos</span>
       </div>
       <div class="stat-value">{{ vm.progress.sessionsCompleted }}</div>
-      <div class="stat-label">Sessions Completed</div>
+      <div class="stat-label">Sessões Concluídas</div>
     </div>
 
-    <!-- Volume Progression -->
-    <div class="stat-card">
+    
+    <div class="stat-card glass">
       <div class="stat-top">
         <span class="stat-icon">📈</span>
         <span class="stat-trend" [class.positive]="vm.progress.volumeProgression >= 0">
@@ -65,16 +64,19 @@
         </span>
       </div>
       <div class="stat-value">{{ vm.trainingDays }}</div>
-      <div class="stat-label">Training Days / Week</div>
+      <div class="stat-label">Dias de Treino / Semana</div>
     </div>
   </div>
 
-  <!-- Current Plan Summary -->
+  
+  <app-dashboard-charts></app-dashboard-charts>
+
+  
   @if (vm.plan) {
-    <div class="plan-summary-card">
+    <div class="plan-summary-card glass">
       <div class="plan-summary-header">
-        <h2>Active Plan</h2>
-        <span class="plan-level-badge">{{ vm.plan.fitnessLevel | titlecase }}</span>
+        <h2>Plano Ativo</h2>
+        <span class="plan-level-badge">{{ getFitnessLevelLabel(vm.plan.fitnessLevel) }}</span>
       </div>
       <div class="plan-days-row">
         @for (day of vm.plan.days; track day.day) {
@@ -88,25 +90,25 @@
     </div>
   }
 
-  <!-- Agent Decision Log -->
+  
   <div class="decision-log">
     <h2 class="log-title">
       <span class="log-dot"></span>
-      Agent Activity Log
+      Registro de Atividade dos Agentes
     </h2>
 
     @if (vm.decisions.length === 0) {
       <div class="log-empty">
-        <p>No agent activity yet. Generate a workout to see the agents in action.</p>
+        <p>Nenhuma atividade ainda. Gere um treino para ver os agentes em ação.</p>
       </div>
     }
 
     <div class="log-entries">
       @for (decision of vm.decisions; track decision.id) {
-        <div class="log-entry">
+        <div class="log-entry glass">
           <div class="log-entry-header">
             <span class="agent-badge" [style.color]="getAgentColor(decision.agentName)">
-              {{ decision.agentName }}
+              {{ getAgentLabel(decision.agentName) }}
             </span>
             <span class="log-time">{{ formatTime(decision.timestamp) }}</span>
           </div>
@@ -118,4 +120,18 @@
   </div>
 
 </div>
+} @else {
+  <div class="dashboard-page">
+    <header class="dash-header">
+      <app-skeleton width="200px" height="2.5rem"></app-skeleton>
+      <app-skeleton width="300px" height="1rem" style="margin-top: 0.5rem"></app-skeleton>
+    </header>
+    <div class="stats-grid">
+      @for (i of [1,2,3,4]; track i) {
+        <app-skeleton height="140px" radius="var(--radius-lg)"></app-skeleton>
+      }
+    </div>
+    <app-skeleton height="300px" radius="var(--radius-lg)" style="margin-top: 1.5rem"></app-skeleton>
+  </div>
 }
+
