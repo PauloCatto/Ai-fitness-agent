@@ -1,0 +1,182 @@
+<section class="onboarding-page">
+  <div class="onboarding-glow"></div>
+
+  <div class="onboarding-card">
+
+    
+    <div class="ob-header">
+      <div class="ob-brand">
+        <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+          <path d="M16 2L28 8V24L16 30L4 24V8L16 2Z" fill="rgba(163,230,53,0.15)" stroke="var(--accent)" stroke-width="1.5"/>
+          <path d="M16 8v16M10 11l6 5 6-5M10 21l6-5 6 5" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span>Agente de Fitness IA</span>
+      </div>
+      <div class="ob-step-label">Passo {{ currentStep() }} de {{ totalSteps }}</div>
+    </div>
+
+    
+    <div class="ob-progress-track">
+      <div class="ob-progress-fill" [style.width.%]="progressPercent()"></div>
+    </div>
+
+    
+    @if (currentStep() === 1) {
+      <div class="ob-step">
+        <h2 class="ob-title">Diga-nos quem você é</h2>
+        <p class="ob-subtitle">Informações básicas para personalizar seu perfil</p>
+
+        <div class="ob-bio-form">
+          <div class="ob-field">
+            <label for="name">Nome completo</label>
+            <input id="name" type="text" [formControl]="nameCtrl" placeholder="Como devemos te chamar?">
+          </div>
+          <div class="ob-bio-row">
+            <div class="ob-field">
+              <label for="age">Idade</label>
+              <input id="age" type="number" [formControl]="ageCtrl" placeholder="Ex: 28">
+            </div>
+            <div class="ob-field">
+              <label for="weight">Peso (kg)</label>
+              <input id="weight" type="number" [formControl]="weightCtrl" placeholder="Ex: 75">
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    
+    @if (currentStep() === 2) {
+      <div class="ob-step" [@.disabled]="true">
+        <h2 class="ob-title">Qual é o seu objetivo principal?</h2>
+        <p class="ob-subtitle">Isso define a estrutura do seu plano de treino</p>
+
+        <div class="ob-option-grid">
+          @for (g of goals; track g.value) {
+            <button
+              class="ob-option"
+              [class.selected]="goalCtrl.value === g.value"
+              (click)="goalCtrl.setValue(g.value)">
+              <span class="ob-option-icon">{{ g.icon }}</span>
+              <span class="ob-option-label">{{ g.label }}</span>
+              <span class="ob-option-desc">{{ g.description }}</span>
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    
+    @if (currentStep() === 3) {
+      <div class="ob-step">
+        <h2 class="ob-title">Qual é o seu nível de condicionamento?</h2>
+        <p class="ob-subtitle">Seja honesto — isso garante um plano seguro e eficaz</p>
+
+        <div class="ob-option-list">
+          @for (lv of levels; track lv.value) {
+            <button
+              class="ob-option-row"
+              [class.selected]="levelCtrl.value === lv.value"
+              (click)="levelCtrl.setValue(lv.value)">
+              <span class="ob-option-icon">{{ lv.icon }}</span>
+              <div class="ob-option-text">
+                <span class="ob-option-label">{{ lv.label }}</span>
+                <span class="ob-option-desc">{{ lv.description }}</span>
+              </div>
+              @if (levelCtrl.value === lv.value) {
+                <span class="ob-check">✓</span>
+              }
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    
+    @if (currentStep() === 4) {
+      <div class="ob-step">
+        <h2 class="ob-title">Quantos dias por semana você pode treinar?</h2>
+        <p class="ob-subtitle">Seja realista com sua rotina</p>
+
+        <div class="ob-days-grid">
+          @for (d of frequencies; track d) {
+            <button
+              class="ob-day-btn"
+              [class.selected]="daysCtrl.value === d"
+              (click)="daysCtrl.setValue(d)">
+              <span class="ob-day-number">{{ d }}</span>
+              <span class="ob-day-label">{{ d === 1 ? 'dia' : 'dias' }}</span>
+            </button>
+          }
+        </div>
+
+        @if (daysCtrl.value) {
+          <p class="ob-days-hint">
+            @if (daysCtrl.value! <= 3) {
+              Ótimo para quem tem agenda cheia — qualidade acima de quantidade 💪
+            } @else if (daysCtrl.value! <= 4) {
+              Frequência ideal para resultados consistentes ⚡
+            } @else {
+              Alta frequência — vamos garantir descanso adequado entre os grupos 🔥
+            }
+          </p>
+        }
+      </div>
+    }
+
+    
+    @if (currentStep() === 5) {
+      <div class="ob-step">
+        <h2 class="ob-title">Você tem alguma limitação física?</h2>
+        <p class="ob-subtitle">Opcional, mas importante para um treino seguro</p>
+
+        <div class="ob-limitations-grid">
+          @for (lim of limitationOptions; track lim.value) {
+            <button
+              class="ob-limitation-btn"
+              [class.selected]="selectedLimitations.has(lim.value)"
+              (click)="toggleLimitation(lim.value)">
+              {{ lim.label }}
+            </button>
+          }
+        </div>
+
+        <div class="ob-field">
+          <label for="injuries-input">Descreva lesões ou restrições específicas (opcional)</label>
+          <textarea
+            id="injuries-input"
+            class="ob-textarea"
+            [formControl]="injuriesCtrl"
+            placeholder="Ex: tendinite no ombro direito, cirurgia de menisco há 6 meses..."
+            rows="3">
+          </textarea>
+        </div>
+      </div>
+    }
+
+    
+    <div class="ob-nav">
+      @if (currentStep() > 1) {
+        <button class="ob-btn-back" (click)="back()">← Voltar</button>
+      } @else {
+        <div></div>
+      }
+
+      <button
+        id="btn-onboarding-next"
+        class="ob-btn-next"
+        [disabled]="!canAdvance || isLoading()"
+        (click)="next()">
+        @if (isLoading()) {
+          <span>Gerando plano...</span>
+        } @else if (currentStep() === totalSteps) {
+          <span>Gerar Meu Treino ⚡</span>
+        } @else {
+          <span>Continuar →</span>
+        }
+      </button>
+    </div>
+
+  </div>
+</section>
+
