@@ -1,8 +1,12 @@
 @if (user$ | async; as user) {
   <div class="bg-glow"></div>
-  <div class="app-shell">
+  <div class="app-shell" [class.sidebar-collapsed]="isSidebarCollapsed()">
     
-    <aside class="sidebar">
+    <button class="sidebar-toggle" (click)="toggleSidebar()" [title]="isSidebarCollapsed() ? 'Expandir' : 'Recolher'">
+      <span class="toggle-icon">{{ isSidebarCollapsed() ? '›' : '‹' }}</span>
+    </button>
+
+    <aside class="sidebar" [class.collapsed]="isSidebarCollapsed()">
       
       <div class="sidebar-logo">
         <div class="logo-icon">
