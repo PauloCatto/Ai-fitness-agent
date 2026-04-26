@@ -1,15 +1,39 @@
 @if (vm$ | async; as vm) {
 <div class="dashboard-page stagger-in">
 
-  
+  <!-- Cabeçalho -->
   <header class="dash-header">
     <h1>Painel</h1>
     <p class="dash-subtitle">Seus dados de treino em um só lugar</p>
   </header>
 
-  
+  <!-- Grade de Avisos/Cards Urgentes -->
+  <div class="urgent-grid">
+    <!-- Card de Feriado -->
+    @if (vm.holiday) {
+      <div class="urgent-card glass holiday-card stagger-in">
+        <div class="card-icon">🏖️</div>
+        <div class="card-content">
+          <h3>Próximo Feriado: {{ vm.holiday.name }}</h3>
+          <p>Está chegando no dia {{ vm.holiday.date | date:'dd/MM' }}! Treine firme agora para aproveitar a praia sem culpa depois. 💪</p>
+        </div>
+      </div>
+    }
+
+    <!-- Card de Insight do Coach -->
+    <div class="urgent-card glass coach-insight stagger-in" [style.--delay]="'0.1s'">
+      <div class="card-icon">🤖</div>
+      <div class="card-content">
+        <h3>Dica do Coach IA</h3>
+        <p>Sua consistência está em {{ vm.progress.weeklyConsistency }}%. @if(vm.progress.weeklyConsistency < 80) { Vamos focar em completar os treinos planejados para esta semana! } @else { Excelente trabalho! Continue mantendo esse ritmo. }</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grade de Estatísticas Rápidas -->
   <div class="stats-grid">
     
+    <!-- Consistência -->
     <div class="stat-card glass">
       <div class="stat-top">
         <span class="stat-icon">📅</span>
@@ -24,7 +48,7 @@
       </div>
     </div>
 
-    
+    <!-- Fadiga -->
     <div class="stat-card glass">
       <div class="stat-top">
         <span class="stat-icon">⚡</span>
@@ -45,7 +69,7 @@
       </div>
     </div>
 
-    
+    <!-- Sessões -->
     <div class="stat-card glass">
       <div class="stat-top">
         <span class="stat-icon">🏆</span>
@@ -55,7 +79,7 @@
       <div class="stat-label">Sessões Concluídas</div>
     </div>
 
-    
+    <!-- Volume -->
     <div class="stat-card glass">
       <div class="stat-top">
         <span class="stat-icon">📈</span>
@@ -68,10 +92,10 @@
     </div>
   </div>
 
-  
-  <app-dashboard-charts></app-dashboard-charts>
+  <!-- Gráficos -->
+  <app-dashboard-charts [progress]="vm.progress" [fatigue]="vm.fatigue"></app-dashboard-charts>
 
-  
+  <!-- Resumo do Plano -->
   @if (vm.plan) {
     <div class="plan-summary-card glass">
       <div class="plan-summary-header">
@@ -90,7 +114,7 @@
     </div>
   }
 
-  
+  <!-- Log de Atividade -->
   <div class="decision-log">
     <h2 class="log-title">
       <span class="log-dot"></span>
@@ -134,4 +158,3 @@
     <app-skeleton height="300px" radius="var(--radius-lg)" style="margin-top: 1.5rem"></app-skeleton>
   </div>
 }
-
