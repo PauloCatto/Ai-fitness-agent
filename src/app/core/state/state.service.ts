@@ -9,12 +9,10 @@ import {
   WorkoutPlan,
   WorkoutSession,
 } from '../models';
-
+import { combineLatest, map } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class StateService {
-  
-
   private readonly _user = new BehaviorSubject<UserProfile | null>(null);
   private readonly _workoutPlan = new BehaviorSubject<WorkoutPlan | null>(null);
   private readonly _session = new BehaviorSubject<WorkoutSession | null>(null);
@@ -37,9 +35,6 @@ export class StateService {
   private readonly _agentDecisions = new BehaviorSubject<AgentDecision[]>([]);
   private readonly _chatMessages = new BehaviorSubject<ChatMessage[]>([]);
   private readonly _error = new BehaviorSubject<string | null>(null);
-
-  
-
   readonly user$: Observable<UserProfile | null> = this._user.asObservable();
   readonly workoutPlan$: Observable<WorkoutPlan | null> = this._workoutPlan.asObservable();
   readonly session$: Observable<WorkoutSession | null> = this._session.asObservable();
@@ -51,7 +46,12 @@ export class StateService {
   readonly chatMessages$: Observable<ChatMessage[]> = this._chatMessages.asObservable();
   readonly error$: Observable<string | null> = this._error.asObservable();
 
-  
+  readonly state$ = combineLatest({
+    user: this.user$,
+    workoutPlan: this.workoutPlan$,
+    progress: this.progress$,
+    fatigue: this.fatigue$,
+  });
 
   getCurrentUser(): UserProfile | null {
     return this._user.getValue();
@@ -72,8 +72,6 @@ export class StateService {
   getCurrentProgress(): ProgressMetrics {
     return this._progress.getValue();
   }
-
-  
 
   setUser(user: UserProfile | null): void {
     this._user.next(user);
@@ -107,13 +105,9 @@ export class StateService {
     this._error.next(error);
   }
 
-  
-
   addAgentDecision(decision: AgentDecision): void {
     const current = this._agentDecisions.getValue();
-    
-    
-    
+
     queueMicrotask(() => {
       this._agentDecisions.next([decision, ...current].slice(0, 50));
     });
@@ -122,15 +116,11 @@ export class StateService {
   clearAgentDecisions(): void {
     this._agentDecisions.next([]);
   }
-
-  
-
   addChatMessage(message: ChatMessage): void {
     const current = this._chatMessages.getValue();
     this._chatMessages.next([...current, message]);
   }
 
-  
   updateLastChatMessage(content: string, isStreaming: boolean = false): void {
     const current = this._chatMessages.getValue();
     if (current.length === 0) return;

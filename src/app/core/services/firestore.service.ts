@@ -4,25 +4,34 @@ import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { UserProfile, WorkoutPlan, WorkoutSession } from '../models';
 
-
 @Injectable({ providedIn: 'root' })
 export class FirestoreService {
   private db: import('firebase/firestore').Firestore | null = null;
 
-  private async getDb(): Promise<import('firebase/firestore').Firestore> {
+  constructor() {
+    this.init();
+  }
+
+  private async init() {
+    if (!this.isConfigured()) return;
+    const { getFirestore } = await import('firebase/firestore');
+    this.db = getFirestore();
+  }
+
+  private async getDb(): Promise<import('firebase/firestore').Firestore | null> {
     if (this.db) return this.db;
+    if (!this.isConfigured()) return null;
     const { getFirestore } = await import('firebase/firestore');
     this.db = getFirestore();
     return this.db;
   }
-
-  
 
   saveUserProfile(profile: UserProfile): Observable<void> {
     if (!this.isConfigured()) return of(undefined);
 
     return from(
       this.getDb().then(async (db) => {
+        if (!db) throw new Error('Firestore not initialized');
         const { doc, setDoc } = await import('firebase/firestore');
         await setDoc(doc(db, 'users', profile.uid), this.toFirestore(profile));
       }),
@@ -34,6 +43,7 @@ export class FirestoreService {
 
     return from(
       this.getDb().then(async (db) => {
+        if (!db) return null;
         const { doc, getDoc } = await import('firebase/firestore');
         const snap = await getDoc(doc(db, 'users', uid));
         return snap.exists() ? (snap.data() as UserProfile) : null;
@@ -41,13 +51,12 @@ export class FirestoreService {
     ).pipe(catchError(() => of(null)));
   }
 
-  
-
   saveWorkoutPlan(plan: WorkoutPlan): Observable<void> {
     if (!this.isConfigured()) return of(undefined);
 
     return from(
       this.getDb().then(async (db) => {
+        if (!db) throw new Error('Firestore not initialized');
         const { doc, setDoc } = await import('firebase/firestore');
         await setDoc(doc(db, 'workoutPlans', plan.id), this.toFirestore(plan));
       }),
@@ -59,6 +68,7 @@ export class FirestoreService {
 
     return from(
       this.getDb().then(async (db) => {
+        if (!db) return null;
         const { collection, query, where, orderBy, limit, getDocs } = await import(
           'firebase/firestore'
         );
@@ -74,13 +84,12 @@ export class FirestoreService {
     ).pipe(catchError(() => of(null)));
   }
 
-  
-
   saveSession(session: WorkoutSession): Observable<void> {
     if (!this.isConfigured()) return of(undefined);
 
     return from(
       this.getDb().then(async (db) => {
+        if (!db) throw new Error('Firestore not initialized');
         const { doc, setDoc } = await import('firebase/firestore');
         await setDoc(doc(db, 'sessions', session.id), this.toFirestore(session));
       }),
@@ -92,6 +101,7 @@ export class FirestoreService {
 
     return from(
       this.getDb().then(async (db) => {
+        if (!db) return [];
         const { collection, query, where, orderBy, limit, getDocs } = await import(
           'firebase/firestore'
         );
@@ -107,9 +117,6 @@ export class FirestoreService {
     ).pipe(catchError(() => of([])));
   }
 
-  
-
-  
   private toFirestore(obj: unknown): Record<string, unknown> {
     return JSON.parse(
       JSON.stringify(obj, (_key, value) =>
