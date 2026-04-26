@@ -192,21 +192,28 @@
     }
 
     
-    <div class="day-tabs stagger-in" role="tablist">
-      @for (day of plan.days; track trackByDay($index, day); let i = $index) {
-        <button
-          class="day-tab"
-          role="tab"
-          [class.active]="selectedDayIndex === i"
-          [class.rest]="day.isRestDay"
-          [attr.aria-selected]="selectedDayIndex === i"
-          [id]="'tab-day-' + i"
-          (click)="selectDay(i)">
-          <span class="tab-label">{{ day.label.substring(0, 3) }}</span>
-          <span class="tab-indicator" [class.rest]="day.isRestDay"></span>
-        </button>
-      }
-    </div>
+    @if (plan.days && plan.days.length > 0) {
+      <div class="day-tabs stagger-in" role="tablist">
+        @for (day of plan.days; track trackByDay($index, day); let i = $index) {
+          <button
+            class="day-tab"
+            role="tab"
+            [class.active]="selectedDayIndex === i"
+            [class.rest]="day.isRestDay"
+            [attr.aria-selected]="selectedDayIndex === i"
+            [id]="'tab-day-' + i"
+            (click)="selectDay(i)">
+            <span class="tab-label">{{ day.label.substring(0, 3) }}</span>
+            <span class="tab-indicator" [class.rest]="day.isRestDay"></span>
+          </button>
+        }
+      </div>
+    } @else {
+      <div class="empty-plan-message stagger-in">
+        <p>Nenhum dia de treino definido para este plano.</p>
+        <button class="btn-accent-sm" (click)="generatePlan()">↺ Tentar Gerar Novamente</button>
+      </div>
+    }
 
     
     @if (getSelectedDay(plan.days); as day) {
@@ -217,9 +224,17 @@
             <p class="day-focus">{{ day.focus }}</p>
           </div>
           @if (!day.isRestDay) {
-            <div class="day-duration">
-              <span class="duration-icon">⏱</span>
-              {{ day.estimatedMinutes | duration }}
+            <div class="day-metrics">
+              <div class="day-progress-ring">
+                <span class="progress-val">{{ getCompletionProgress(day) }}%</span>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill" [style.width.%]="getCompletionProgress(day)"></div>
+                </div>
+              </div>
+              <div class="day-duration">
+                <span class="duration-icon">⏱</span>
+                {{ day.estimatedMinutes | duration }}
+              </div>
             </div>
           }
         </div>
@@ -236,16 +251,25 @@
           <div class="exercise-list">
             @for (exercise of day.exercises; track exercise.id; let i = $index) {
               <div class="exercise-wrapper stagger-in" [style.animation-delay]="i * 0.05 + 's'">
-                <div class="exercise-number">{{ i + 1 }}</div>
-                <app-exercise-card [exercise]="exercise" class="exercise-card-full" />
+                <div class="exercise-number" [class.completed]="isExerciseCompleted(exercise.id)">
+                  {{ isExerciseCompleted(exercise.id) ? '✓' : i + 1 }}
+                </div>
+                <app-exercise-card 
+                  [exercise]="exercise" 
+                  [isCompleted]="isExerciseCompleted(exercise.id)"
+                  (complete)="toggleExercise(exercise.id)"
+                  class="exercise-card-full" />
               </div>
             }
           </div>
 
           
           @if (!sessionFeedbackSent) {
-            <div class="feedback-section glass stagger-in">
+            <div class="feedback-section glass stagger-in" [class.disabled]="getCompletionProgress(day) < 50">
               <h3 class="feedback-title">Como foi o treino de hoje?</h3>
+              @if (getCompletionProgress(day) < 50) {
+                <p class="feedback-lock">Conclua pelo menos 50% do treino para dar feedback.</p>
+              }
               <div class="feedback-buttons">
                 <button
                   id="btn-feedback-easy"
@@ -300,4 +324,3 @@
     <div class="error-bar">⚠ {{ err }}</div>
   }
 </div>
-

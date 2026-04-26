@@ -35,9 +35,9 @@ export class WorkoutComponent implements OnInit {
   showReasoning: boolean = false;
   sessionFeedbackSent: boolean = false;
   isEditingProfile: boolean = false;
+  completedExerciseIds = new Set<string>();
 
   readonly availableLimitations: PhysicalLimitation[] = ['joelho', 'ombro', 'lombar', 'quadril', 'tornozelo', 'cervical', 'punho'];
-
   readonly profileForm = this.fb.group({
     displayName: ['', Validators.required],
     age: [0, [Validators.required, Validators.min(13), Validators.max(100)]],
@@ -64,6 +64,25 @@ export class WorkoutComponent implements OnInit {
   selectDay(index: number): void {
     this.selectedDayIndex = index;
     this.sessionFeedbackSent = false;
+    this.completedExerciseIds.clear();
+  }
+
+  toggleExercise(exerciseId: string): void {
+    if (this.completedExerciseIds.has(exerciseId)) {
+      this.completedExerciseIds.delete(exerciseId);
+    } else {
+      this.completedExerciseIds.add(exerciseId);
+    }
+  }
+
+  isExerciseCompleted(exerciseId: string): boolean {
+    return this.completedExerciseIds.has(exerciseId);
+  }
+
+  getCompletionProgress(day: WorkoutDay): number {
+    if (!day || day.exercises.length === 0) return 0;
+    const completed = day.exercises.filter(e => this.completedExerciseIds.has(e.id)).length;
+    return Math.round((completed / day.exercises.length) * 100);
   }
 
   submitFeedback(feedback: SessionFeedback): void {
@@ -78,7 +97,7 @@ export class WorkoutComponent implements OnInit {
       date: new Date(),
       dayIndex: this.selectedDayIndex,
       feedback,
-      completedExerciseIds: plan.days[this.selectedDayIndex]?.exercises.map((e) => e.id) ?? [],
+      completedExerciseIds: Array.from(this.completedExerciseIds),
       durationMinutes: plan.days[this.selectedDayIndex]?.estimatedMinutes ?? 0,
     };
 
