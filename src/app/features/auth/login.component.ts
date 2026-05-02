@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -12,7 +12,7 @@ import { StateService } from '../../core/state/state.service';
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly state = inject(StateService);
   private readonly router = inject(Router);
@@ -26,6 +26,12 @@ export class LoginComponent {
   isLoading: boolean = false;
   errorMessage: string = '';
   showEmailForm: boolean = false;
+
+  ngOnInit(): void {
+    if (this.state.getCurrentUser()) {
+      this.router.navigate(['/workout']);
+    }
+  }
 
 
   enterDemoMode(): void {

@@ -10,7 +10,7 @@ import { StateService } from '../state/state.service';
 export class AuthService {
   private auth: import('firebase/auth').Auth | null = null;
 
-  constructor(private readonly state: StateService) {}
+  constructor(private readonly state: StateService) { }
 
   private async getAuth(): Promise<import('firebase/auth').Auth> {
     if (this.auth) return this.auth;
@@ -19,8 +19,6 @@ export class AuthService {
     this.auth = getAuth();
     return this.auth;
   }
-
-  
 
   signInWithGoogle(): Observable<UserProfile> {
     if (!this.isFirebaseConfigured()) {
@@ -53,12 +51,12 @@ export class AuthService {
     return from(
       this.getAuth().then(async (auth) => {
         const { signOut } = await import('firebase/auth');
-        return signOut(auth);
+        await signOut(auth);
+        this.state.setUser(null);
       }),
     );
   }
 
-  
   signInAsDemo(): void {
     const demoUser: UserProfile = {
       uid: 'demo-user-001',
@@ -83,8 +81,6 @@ export class AuthService {
     };
     this.state.setUser(demoUser);
   }
-
-  
 
   private async googleSignIn(): Promise<import('firebase/auth').User> {
     const auth = await this.getAuth();
