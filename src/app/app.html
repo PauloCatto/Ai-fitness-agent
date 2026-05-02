@@ -1,4 +1,4 @@
-@if (user$ | async; as user) {
+@if ((user$ | async) && !isLoginPage()) {
   <div class="bg-glow"></div>
   <div class="app-shell" [class.sidebar-collapsed]="isSidebarCollapsed()">
     
@@ -82,10 +82,10 @@
 
       
       <div class="sidebar-user">
-        <div class="user-avatar">{{ user.displayName.charAt(0).toUpperCase() }}</div>
+        <div class="user-avatar">{{ (user$ | async)?.displayName?.charAt(0)?.toUpperCase() }}</div>
         <div class="user-info">
-          <span class="user-name">{{ user.displayName }}</span>
-          <span class="user-level">{{ user.fitnessLevel | titlecase }}</span>
+          <span class="user-name">{{ (user$ | async)?.displayName }}</span>
+          <span class="user-level">{{ (user$ | async)?.fitnessLevel | titlecase }}</span>
         </div>
         <button id="btn-signout" class="signout-btn" (click)="signOut()" title="Sair">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
