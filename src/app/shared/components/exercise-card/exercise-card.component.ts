@@ -24,5 +24,11 @@ export class ExerciseCardComponent {
     event.stopPropagation();
     this.complete.emit();
   }
+
+  formatLabel(val: any): string {
+    if (!val) return '';
+    if (typeof val === 'string') return val;
+    return val.name || val.toString() || '';
+  }
 }
 

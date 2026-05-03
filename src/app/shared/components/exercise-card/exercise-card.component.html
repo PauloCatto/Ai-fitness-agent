@@ -17,7 +17,7 @@
     <div class="card-meta">
       <div class="meta-chips">
         @for (group of exercise.muscleGroups; track group) {
-          <span class="muscle-chip">{{ group | titlecase }}</span>
+          <span class="muscle-chip">{{ formatLabel(group) | titlecase }}</span>
         }
       </div>
       <div class="sets-reps">
@@ -51,7 +51,7 @@
 
       <div class="equipment-row">
         @for (eq of exercise.equipment; track eq) {
-          <span class="equipment-badge">{{ eq | titlecase }}</span>
+          <span class="equipment-badge">{{ formatLabel(eq) | titlecase }}</span>
         }
       </div>
     </div>
