@@ -22,4 +22,10 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/workout/workout.component').then(m => m.WorkoutComponent),
   },
+  {
+    path: 'chat',
+    loadComponent: () =>
+      import('./features/chat/chat.component').then(m => m.ChatComponent),
+  },
+  { path: '**', redirectTo: 'login' },
 ];

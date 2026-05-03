@@ -2,7 +2,6 @@ import { Component, inject, OnInit } from '@angular/core';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { StateService } from '../../core/state/state.service';
-import { FirestoreService } from '../../core/services/firestore.service';
 import { PlannerAgent } from '../../core/agents/planner.agent';
 import { ProgressAgent } from '../../core/agents/progress.agent';
 import { ExerciseCardComponent } from '../../shared/components/exercise-card/exercise-card.component';
@@ -10,6 +9,7 @@ import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { DurationPipe } from '../../shared/pipes/duration.pipe';
 import { WorkoutDay, WorkoutSession, SessionFeedback, GoalType, FitnessLevel, UserProfile, PhysicalLimitation } from '../../core/models';
+import { UserService } from '../../core/services/user.service';
 
 @Component({
   selector: 'app-workout',
@@ -22,7 +22,7 @@ export class WorkoutComponent implements OnInit {
   private readonly state = inject(StateService);
   private readonly plannerAgent = inject(PlannerAgent);
   private readonly progressAgent = inject(ProgressAgent);
-  private readonly firestoreAgent = inject(FirestoreService);
+  private readonly userService = inject(UserService);
   private readonly fb = inject(FormBuilder);
 
   readonly plan$ = this.state.workoutPlan$;
@@ -147,7 +147,16 @@ export class WorkoutComponent implements OnInit {
     };
 
     this.state.setUser(updated);
-    this.firestoreAgent.saveUserProfile(updated).subscribe();
+    this.userService.updateProfile({
+      displayName: updated.displayName,
+      age: updated.age,
+      weight: updated.weight,
+      goal: updated.goal,
+      fitnessLevel: updated.fitnessLevel,
+      daysPerWeek: updated.preferences.daysPerWeek,
+      limitations: updated.limitations,
+      injuries: updated.injuries
+    }).subscribe();
     this.plannerAgent.requestPlan(updated);
     this.isEditingProfile = false;
   }
@@ -170,11 +179,13 @@ export class WorkoutComponent implements OnInit {
     this.profileForm.patchValue({ limitations: updated });
   }
 
-  getSelectedDay(days: WorkoutDay[]): WorkoutDay | null {
+  getSelectedDay(days: any): WorkoutDay | null {
+    if (!Array.isArray(days)) return null;
     return days[this.selectedDayIndex] ?? null;
   }
 
-  getTrainingDaysCount(days: WorkoutDay[]): number {
+  getTrainingDaysCount(days: any): number {
+    if (!Array.isArray(days)) return 0;
     return days.filter((d) => !d.isRestDay).length;
   }
 
