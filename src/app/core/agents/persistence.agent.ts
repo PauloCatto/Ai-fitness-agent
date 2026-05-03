@@ -1,13 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { StateService } from '../state/state.service';
-import { FirestoreService } from '../services/firestore.service';
 import { skip, tap, filter, delay } from 'rxjs/operators';
 import { UserProfile, WorkoutPlan, WorkoutSession } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class PersistenceAgent {
   private readonly state = inject(StateService);
-  private readonly firestore = inject(FirestoreService);
   private readonly STORAGE_KEY = 'ai_fitness_agent_data';
 
   constructor() {
@@ -40,24 +38,15 @@ export class PersistenceAgent {
       };
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
     });
-
-    this.state.user$.pipe(
-      filter(u => u !== null),
-      skip(1)
-    ).subscribe(user => {
-      this.firestore.saveUserProfile(user!).subscribe();
-    });
-
-    this.state.workoutPlan$.pipe(
-      filter(p => p !== null),
-      skip(1)
-    ).subscribe(plan => {
-      this.firestore.saveWorkoutPlan(plan!).subscribe();
-    });
   }
 
   private reviveDates(obj: any): any {
-    if (!obj) return obj;
+    if (!obj || typeof obj !== 'object') return obj;
+
+    if (Array.isArray(obj)) {
+      return obj.map(item => this.reviveDates(item));
+    }
+
     const res = { ...obj };
     Object.keys(res).forEach(key => {
       const val = res[key];

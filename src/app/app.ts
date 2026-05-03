@@ -1,19 +1,20 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { StateService } from './core/state/state.service';
 import { AuthService } from './core/services/auth.service';
 import { PersistenceAgent } from './core/agents/persistence.agent';
+import { ToastComponent } from './shared/components/toast/toast.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, AsyncPipe, CommonModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, AsyncPipe, CommonModule, ToastComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App {
+export class App implements OnInit {
   private readonly state = inject(StateService);
   private readonly auth = inject(AuthService);
   private readonly persistence = inject(PersistenceAgent);
@@ -32,8 +33,12 @@ export class App {
     )
   );
 
+  ngOnInit(): void {
+    this.auth.initializeSession().subscribe();
+  }
+
   isLoginPage = computed(() => this.url()?.includes('/login') ?? true);
-  
+
   isSidebarCollapsed = signal(false);
 
   toggleSidebar(): void {
@@ -52,4 +57,3 @@ export class App {
     return '🟢';
   }
 }
-
