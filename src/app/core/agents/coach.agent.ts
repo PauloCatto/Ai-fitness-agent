@@ -28,6 +28,7 @@ export class CoachAgent implements OnDestroy {
   private initChatStream(): void {
     const sub = this._message$.pipe(
       tap(({ message }) => {
+        this.state.setLoading(true);
         const userMsg: ChatMessage = {
           id: crypto.randomUUID(),
           role: 'user',
@@ -35,31 +36,38 @@ export class CoachAgent implements OnDestroy {
           timestamp: new Date(),
         };
         this.state.addChatMessage(userMsg);
-        const assistantPlaceholder: ChatMessage = {
-          id: crypto.randomUUID(),
-          role: 'assistant',
-          content: '',
-          timestamp: new Date(),
-          isStreaming: true,
-        };
-        this.state.addChatMessage(assistantPlaceholder);
       }),
       withLatestFrom(this.state.workoutPlan$, this.state.user$),
       switchMap(([{ message }, plan, user]) => {
         const context = this.buildContext(plan, user);
         let fullResponse = '';
+        let isFirstChunk = true;
         return this.aiService.chat(message, context).pipe(
           scan((accumulated, chunk) => accumulated + chunk, ''),
           tap((accumulated) => {
+            if (isFirstChunk && accumulated.trim()) {
+              this.state.setLoading(false);
+              const assistantMsg: ChatMessage = {
+                id: crypto.randomUUID(),
+                role: 'assistant',
+                content: '',
+                timestamp: new Date(),
+                isStreaming: true,
+              };
+              this.state.addChatMessage(assistantMsg);
+              isFirstChunk = false;
+            }
             fullResponse = accumulated;
             this.state.updateLastChatMessage(accumulated, true);
           }),
           catchError((err) => {
+            this.state.setLoading(false);
             this.state.updateLastChatMessage(`Erro: ${err.message}`, false);
             return EMPTY;
           }),
           tap({
             complete: () => {
+              this.state.setLoading(false);
               this.state.updateLastChatMessage(fullResponse, false);
               if (this.currentConversationId) {
                 this.conversationService.saveMessages(

@@ -1,7 +1,6 @@
 export const environment = {
   production: false,
   apiUrl: 'http://localhost:5294/api',
-  geminiApiKey: 'YOUR_GEMINI_API_KEY',
-  useMockAi: true
+  useMockAi: false
 };
 
