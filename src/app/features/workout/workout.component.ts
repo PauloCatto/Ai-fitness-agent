@@ -21,7 +21,6 @@ import { UserService } from '../../core/services/user.service';
 export class WorkoutComponent implements OnInit {
   private readonly state = inject(StateService);
   private readonly plannerAgent = inject(PlannerAgent);
-  private readonly progressAgent = inject(ProgressAgent);
   private readonly userService = inject(UserService);
   private readonly fb = inject(FormBuilder);
 
