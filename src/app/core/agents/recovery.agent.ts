@@ -4,30 +4,24 @@ import { tap, withLatestFrom, filter, map } from 'rxjs';
 import { StateService } from '../state/state.service';
 import { AgentDecision, FatigueLevel } from '../models';
 
-
 @Injectable({ providedIn: 'root' })
 export class RecoveryAgent implements OnDestroy {
   private readonly state = inject(StateService);
-
   private readonly subscriptions = new Subscription();
   private readonly _evaluate$ = new Subject<void>();
 
-  constructor() {
+  constructor() { }
+
+  ngOnInit(): void {
     this.initSessionMonitor();
     this.initManualEvaluation();
   }
 
-  
-
-  
   evaluate(): void {
     this._evaluate$.next();
   }
 
-  
-
   private initSessionMonitor(): void {
-    
     const sub = this.state.session$
       .pipe(
         filter((session) => session !== null),
@@ -77,17 +71,14 @@ export class RecoveryAgent implements OnDestroy {
     this.subscriptions.add(sub);
   }
 
-  
-
   private computeFatigue(
     sessionsCompleted: number,
     lastFeedback?: string,
     currentScore: number = 0,
   ): FatigueLevel {
-    
+
     let score = Math.min(10, currentScore + (sessionsCompleted % 3 === 0 ? 2 : 1));
 
-    
     if (lastFeedback === 'too_hard') score = Math.min(10, score + 2);
     if (lastFeedback === 'too_easy') score = Math.max(0, score - 1);
     if (lastFeedback === 'just_right') score = Math.max(0, score - 0.5);
@@ -111,8 +102,6 @@ export class RecoveryAgent implements OnDestroy {
     };
     return map[rec];
   }
-
-  
 
   private emitDecision(
     reason: string,

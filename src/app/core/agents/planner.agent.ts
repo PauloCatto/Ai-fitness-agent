@@ -13,9 +13,12 @@ export class PlannerAgent implements OnDestroy {
   private readonly subscriptions = new Subscription();
   private readonly _trigger$ = new Subject<UserProfile>();
 
-  constructor() {
+  constructor() { }
+
+  ngOnInit(): void {
     this.initStream();
   }
+
   requestPlan(user: UserProfile): void {
     this._trigger$.next(user);
   }

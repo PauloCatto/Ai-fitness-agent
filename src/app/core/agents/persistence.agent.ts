@@ -1,14 +1,15 @@
 import { Injectable, inject } from '@angular/core';
 import { StateService } from '../state/state.service';
-import { skip, tap, filter, delay } from 'rxjs/operators';
-import { UserProfile, WorkoutPlan, WorkoutSession } from '../models';
+import { skip } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class PersistenceAgent {
   private readonly state = inject(StateService);
   private readonly STORAGE_KEY = 'ai_fitness_agent_data';
 
-  constructor() {
+  constructor() { }
+
+  ngOnInit(): void {
     this.init();
     this.setupAutoSave();
   }

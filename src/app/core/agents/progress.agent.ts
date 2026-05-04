@@ -5,7 +5,6 @@ import { StateService } from '../state/state.service';
 import { AiService } from '../services/ai.service';
 import { AgentDecision, WorkoutPlan, SessionFeedback } from '../models';
 
-
 @Injectable({ providedIn: 'root' })
 export class ProgressAgent implements OnDestroy {
   private readonly state = inject(StateService);
@@ -13,16 +12,16 @@ export class ProgressAgent implements OnDestroy {
   private readonly subscriptions = new Subscription();
   private readonly _recalculate$ = new Subject<void>();
 
-  constructor() {
+  constructor() { }
+
+  ngOnInit(): void {
     this.initFeedbackStream();
     this.initRecalculationStream();
   }
 
-
   recalculate(): void {
     this._recalculate$.next();
   }
-
 
   private initFeedbackStream(): void {
     const sub = this.state.session$
@@ -117,7 +116,6 @@ export class ProgressAgent implements OnDestroy {
       lastUpdated: new Date(),
     });
   }
-
 
   private emitDecision(
     reason: string,

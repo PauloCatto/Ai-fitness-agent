@@ -3,7 +3,7 @@ import { Subject, Subscription } from 'rxjs';
 import { scan, tap, switchMap, catchError, EMPTY, withLatestFrom } from 'rxjs';
 import { StateService } from '../state/state.service';
 import { AiService } from '../services/ai.service';
-import { AgentDecision, ChatMessage, CoachChatRequest } from '../models';
+import { ChatMessage, CoachChatRequest } from '../models';
 import { ConversationService } from '../services/conversation.service';
 
 @Injectable({ providedIn: 'root' })
@@ -15,7 +15,9 @@ export class CoachAgent implements OnDestroy {
   private readonly _message$ = new Subject<CoachChatRequest>();
   private currentConversationId: string | null = null;
 
-  constructor() {
+  constructor() { }
+
+  ngOnInit(): void {
     this.initChatStream();
   }
 
@@ -95,18 +97,6 @@ export class CoachAgent implements OnDestroy {
       parts.push(`Plan Reasoning: ${plan.agentReasoning.substring(0, 200)}`);
     }
     return parts.join('. ');
-  }
-
-  private emitDecision(reason: string, action: string, metadata?: Record<string, unknown>): void {
-    const decision: AgentDecision = {
-      id: crypto.randomUUID(),
-      agentName: 'CoachAgent',
-      timestamp: new Date(),
-      reason,
-      action,
-      metadata,
-    };
-    this.state.addAgentDecision(decision);
   }
 
   ngOnDestroy(): void {
