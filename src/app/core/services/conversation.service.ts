@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Conversation, ConversationMessage } from '../models';
+
 @Injectable({ providedIn: 'root' })
 export class ConversationService {
   private readonly http = inject(HttpClient);

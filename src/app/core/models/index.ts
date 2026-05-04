@@ -1,5 +1,7 @@
 
 
+import { HttpHeaders, HttpParams } from '@angular/common/http';
+
 export type FitnessLevel = 'beginner' | 'intermediate' | 'advanced';
 
 export type GoalType = 'hypertrophy' | 'strength' | 'weight_loss' | 'endurance';
@@ -36,8 +38,6 @@ export type SessionFeedback = 'too_easy' | 'just_right' | 'too_hard';
 
 export type AgentName = 'PlannerAgent' | 'ProgressAgent' | 'RecoveryAgent' | 'CoachAgent';
 
-
-
 export interface UserProfile {
   uid: string;
   displayName: string;
@@ -47,7 +47,7 @@ export interface UserProfile {
   goals: string[];
   preferences: WorkoutPreferences;
   createdAt: Date;
-  
+
   onboardingCompleted: boolean;
   goal: GoalType;
   age: number;
@@ -63,8 +63,6 @@ export interface WorkoutPreferences {
   focusAreas: MuscleGroup[];
 }
 
-
-
 export interface Exercise {
   id: string;
   name: string;
@@ -79,7 +77,7 @@ export interface Exercise {
 }
 
 export interface WorkoutDay {
-  day: number; 
+  day: number;
   label: string;
   focus: string;
   isRestDay: boolean;
@@ -99,8 +97,6 @@ export interface WorkoutPlan {
   agentReasoning: string;
 }
 
-
-
 export interface WorkoutSession {
   id: string;
   planId: string;
@@ -114,22 +110,20 @@ export interface WorkoutSession {
 }
 
 export interface FatigueLevel {
-  score: number; 
+  score: number;
   trend: 'increasing' | 'stable' | 'decreasing';
   lastUpdated: Date;
   recommendation: 'train' | 'light_session' | 'rest';
 }
 
 export interface ProgressMetrics {
-  weeklyConsistency: number; 
-  volumeProgression: number; 
+  weeklyConsistency: number;
+  volumeProgression: number;
   fatigueAverage: number;
   sessionsCompleted: number;
-  streak: number; 
+  streak: number;
   lastUpdated: Date;
 }
-
-
 
 
 export interface AgentDecision {
@@ -141,8 +135,6 @@ export interface AgentDecision {
   metadata?: Record<string, unknown>;
 }
 
-
-
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
@@ -150,9 +142,6 @@ export interface ChatMessage {
   timestamp: Date;
   isStreaming?: boolean;
 }
-
-
-
 
 export interface AiExerciseDto {
   id: string;
@@ -184,7 +173,6 @@ export interface AiWorkoutResponseDto {
   days: AiWorkoutDayDto[];
 }
 
-
 export interface OnboardingPayload {
   displayName: string;
   age: number;
@@ -198,9 +186,9 @@ export interface OnboardingPayload {
 
 export interface AuthResponse {
   token: string;
-  user: { 
-    id: string; 
-    email: string; 
+  user: {
+    id: string;
+    email: string;
     displayName: string;
     onboardingCompleted: boolean;
     age?: number;
@@ -236,4 +224,19 @@ export interface ConversationMessage {
 
 export interface CoachChatRequest {
   message: string;
+}
+
+export interface HttpOptions {
+  headers?: HttpHeaders | { [header: string]: string | string[] };
+  observe?: 'body';
+  params?: HttpParams | { [param: string]: string | number | boolean | ReadonlyArray<string | number | boolean> };
+  reportProgress?: boolean;
+  responseType?: 'json';
+  withCredentials?: boolean;
+}
+
+export interface Holiday {
+  date: string;
+  name: string;
+  type: string;
 }
