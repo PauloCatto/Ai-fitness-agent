@@ -184,3 +184,37 @@ export interface AiWorkoutResponseDto {
   days: AiWorkoutDayDto[];
 }
 
+
+export interface OnboardingPayload {
+  displayName: string;
+  age: number;
+  weight: number;
+  goal: string;
+  fitnessLevel: string;
+  limitations: string[];
+  injuries: string;
+  daysPerWeek: number;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: { 
+    id: string; 
+    email: string; 
+    displayName: string;
+    onboardingCompleted: boolean;
+    age?: number;
+    weight?: number;
+    goal?: string;
+    fitnessLevel?: string;
+    daysPerWeek?: number;
+    limitations?: string[];
+    injuries?: string;
+  };
+}
+
+export interface Toast {
+  id: number;
+  message: string;
+  type: 'success' | 'error' | 'info';
+}

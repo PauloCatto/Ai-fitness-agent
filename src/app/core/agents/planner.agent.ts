@@ -3,14 +3,12 @@ import { Subject, Subscription } from 'rxjs';
 import { switchMap, tap, catchError, EMPTY, filter } from 'rxjs';
 import { StateService } from '../state/state.service';
 import { AiService } from '../services/ai.service';
-import { FirestoreService } from '../services/firestore.service';
 import { AgentDecision, UserProfile } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class PlannerAgent implements OnDestroy {
   private readonly state = inject(StateService);
   private readonly aiService = inject(AiService);
-  private readonly firestore = inject(FirestoreService);
 
   private readonly subscriptions = new Subscription();
   private readonly _trigger$ = new Subject<UserProfile>();
@@ -22,13 +20,10 @@ export class PlannerAgent implements OnDestroy {
     this._trigger$.next(user);
   }
 
-  // ─── Stream Logic ─────────────────────────────────────────────────────────
-
   private initStream(): void {
     const sub = this._trigger$
       .pipe(
         tap((user) => {
-          // Guard: never generate without a completed onboarding
           if (!user.onboardingCompleted) {
             this.emitDecision(
               'Geração de treino bloqueada — onboarding não concluído',
@@ -70,11 +65,6 @@ export class PlannerAgent implements OnDestroy {
             `Plano cobre ${plan.estimatedWeeklyMinutes} minutos/semana no nível ${translatedLevel}`,
             { planId: plan.id, weekNumber: plan.weekNumber },
           );
-
-          const user = this.state.getCurrentUser();
-          if (user) {
-            this.firestore.saveWorkoutPlan(plan).subscribe();
-          }
         }),
       )
       .subscribe();

@@ -1,9 +1,14 @@
-<div class="spinner-wrapper" [class.fullscreen]="fullscreen">
-  <div class="spinner-ring">
-    <div></div><div></div><div></div><div></div>
+<div class="loading-overlay" [class.fullscreen]="fullscreen">
+  <div class="glass-container">
+    <div class="spinner-wrapper">
+      <div class="spinner"></div>
+      <div class="spinner-inner"></div>
+      <div class="icon">⚡</div>
+    </div>
+    @if (message) {
+      <p class="loading-message">{{ message }}</p>
+    } @else {
+      <p class="loading-message">Processando com IA...</p>
+    }
   </div>
-  @if (message) {
-    <p class="spinner-message">{{ message }}</p>
-  }
 </div>
-

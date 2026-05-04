@@ -24,6 +24,70 @@
   margin: 0;
 }
 
+.urgent-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.urgent-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.05), transparent);
+    pointer-events: none;
+  }
+
+  .card-icon {
+    font-size: 1.75rem;
+    flex-shrink: 0;
+    background: var(--surface-2);
+    width: 3.5rem;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+  }
+
+  .card-content {
+    h3 {
+      font-size: 0.9375rem;
+      margin-bottom: 0.25rem;
+    }
+    p {
+      font-size: 0.8125rem;
+      color: var(--text-2);
+      line-height: 1.4;
+    }
+  }
+
+  &.holiday-card {
+    border-left: 4px solid var(--accent);
+    .card-icon { color: var(--accent); }
+  }
+
+  &.coach-insight {
+    border-left: 4px solid var(--ai);
+    .card-icon { color: var(--ai); }
+  }
+}
+
 
 
 .stats-grid {

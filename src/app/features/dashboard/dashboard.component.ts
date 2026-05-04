@@ -3,7 +3,8 @@ import { AsyncPipe, CommonModule } from '@angular/common';
 import { StateService } from '../../core/state/state.service';
 import { DashboardChartsComponent } from './components/dashboard-charts/dashboard-charts.component';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
-import { combineLatest, map, delay, startWith } from 'rxjs';
+import { combineLatest, map, delay, startWith, Observable, of } from 'rxjs';
+import { HolidayService, Holiday } from '../../core/services/holiday.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -14,23 +15,24 @@ import { combineLatest, map, delay, startWith } from 'rxjs';
 })
 export class DashboardComponent {
   private readonly state = inject(StateService);
-
+  private readonly holidayService = inject(HolidayService);
   readonly progress$ = this.state.progress$;
   readonly fatigue$ = this.state.fatigue$;
   readonly plan$ = this.state.workoutPlan$;
   readonly agentDecisions$ = this.state.agentDecisions$;
-
   readonly vm$ = combineLatest([
     this.state.progress$,
     this.state.fatigue$,
     this.state.workoutPlan$,
     this.state.agentDecisions$,
+    this.holidayService.getNextHoliday().pipe(startWith(null)),
   ]).pipe(
-    map(([progress, fatigue, plan, decisions]) => ({
+    map(([progress, fatigue, plan, decisions, holiday]) => ({
       progress,
       fatigue,
       plan,
       decisions,
+      holiday,
       trainingDays: plan?.days.filter((d) => !d.isRestDay).length ?? 0,
       totalExercises: plan?.days.reduce((acc, d) => acc + d.exercises.length, 0) ?? 0,
     }))

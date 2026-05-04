@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Exercise } from '../../../core/models';
 
@@ -11,10 +11,24 @@ import { Exercise } from '../../../core/models';
 })
 export class ExerciseCardComponent {
   @Input({ required: true }) exercise!: Exercise;
+  @Input() isCompleted: boolean = false;
+  @Output() complete = new EventEmitter<void>();
+
   isExpanded: boolean = false;
 
   toggle(): void {
     this.isExpanded = !this.isExpanded;
+  }
+
+  onComplete(event: Event): void {
+    event.stopPropagation();
+    this.complete.emit();
+  }
+
+  formatLabel(val: any): string {
+    if (!val) return '';
+    if (typeof val === 'string') return val;
+    return val.name || val.toString() || '';
   }
 }
 

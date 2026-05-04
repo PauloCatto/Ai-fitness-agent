@@ -1,4 +1,4 @@
-<div class="exercise-card" [class.expanded]="isExpanded">
+<div class="exercise-card" [class.expanded]="isExpanded" [class.completed]="isCompleted">
   
   <div class="card-header" (click)="toggle()">
     <div class="card-title-row">
@@ -6,13 +6,18 @@
         <span class="difficulty-dot" [class]="exercise.difficulty"></span>
         <h3 class="exercise-name">{{ exercise.name }}</h3>
       </div>
-      <span class="expand-icon" [class.rotated]="isExpanded">›</span>
+      <div class="action-row">
+        <button class="check-btn" (click)="onComplete($event)" [class.checked]="isCompleted" title="Marcar como concluído">
+          <span class="check-icon">✓</span>
+        </button>
+        <span class="expand-icon" [class.rotated]="isExpanded">›</span>
+      </div>
     </div>
 
     <div class="card-meta">
       <div class="meta-chips">
         @for (group of exercise.muscleGroups; track group) {
-          <span class="muscle-chip">{{ group | titlecase }}</span>
+          <span class="muscle-chip">{{ formatLabel(group) | titlecase }}</span>
         }
       </div>
       <div class="sets-reps">
@@ -46,7 +51,7 @@
 
       <div class="equipment-row">
         @for (eq of exercise.equipment; track eq) {
-          <span class="equipment-badge">{{ eq | titlecase }}</span>
+          <span class="equipment-badge">{{ formatLabel(eq) | titlecase }}</span>
         }
       </div>
     </div>

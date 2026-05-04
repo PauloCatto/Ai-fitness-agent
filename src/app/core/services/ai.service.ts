@@ -14,12 +14,8 @@ import {
   MuscleGroup,
 } from '../models';
 
-
 @Injectable({ providedIn: 'root' })
 export class AiService {
-  
-
-  
   generateWorkout(profile: UserProfile): Observable<WorkoutPlan> {
     if (environment.useMockAi) {
       return this.mockGenerateWorkout(profile);
@@ -27,7 +23,6 @@ export class AiService {
     return this.geminiGenerateWorkout(profile);
   }
 
-  
   explainWorkout(plan: WorkoutPlan, question?: string): Observable<string> {
     if (environment.useMockAi) {
       return this.mockStreamText(this.buildExplainMockText(plan, question));
@@ -35,7 +30,6 @@ export class AiService {
     return this.geminiStream(this.buildExplainPrompt(plan, question));
   }
 
-  
   adjustWorkout(plan: WorkoutPlan, feedbackReason: string): Observable<WorkoutPlan> {
     if (environment.useMockAi) {
       return this.mockAdjustWorkout(plan, feedbackReason);
@@ -47,7 +41,6 @@ export class AiService {
     );
   }
 
-  
   chat(message: string, context: string): Observable<string> {
     if (environment.useMockAi) {
       return this.mockStreamText(this.buildChatMockResponse(message));
@@ -55,10 +48,7 @@ export class AiService {
     return this.geminiStream(this.buildChatPrompt(message, context));
   }
 
-  
-
   private async getGeminiModel() {
-    
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
     const genAI = new GoogleGenerativeAI(environment.geminiApiKey);
     return genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
@@ -104,11 +94,9 @@ export class AiService {
           .catch((err) => observer.error(err));
       });
 
-      return () => {}; 
+      return () => {};
     });
   }
-
-  
 
   private buildWorkoutPrompt(
     profile: UserProfile,
@@ -220,10 +208,7 @@ Respond in 1-2 paragraphs max. Be specific, practical, and motivating.
 `.trim();
   }
 
-  
-
   private parseWorkoutResponse(raw: string, profile: UserProfile): WorkoutPlan {
-    
     const cleaned = raw.replace(/```json|```/g, '').trim();
 
     let dto: AiWorkoutResponseDto;
@@ -261,22 +246,19 @@ Respond in 1-2 paragraphs max. Be specific, practical, and motivating.
     return {
       id: e.id ?? crypto.randomUUID(),
       name: e.name,
-      muscleGroups: e.muscleGroups as MuscleGroup[],
+      muscleGroups: (e.muscleGroups ?? []).map(g => typeof g === 'string' ? g : (g as any).name || (g as any).toString()) as MuscleGroup[],
       sets: e.sets,
       reps: e.reps,
       restSeconds: e.restSeconds,
       difficulty: e.difficulty as FitnessLevel,
       instructions: e.instructions,
       tips: e.tips,
-      equipment: e.equipment as Equipment[],
+      equipment: (e.equipment ?? []).map(eq => typeof eq === 'string' ? eq : (eq as any).name || (eq as any).toString()) as Equipment[],
     };
   }
 
-  
-
   private mockGenerateWorkout(profile: UserProfile): Observable<WorkoutPlan> {
     const plan = this.buildMockPlan(profile);
-    
     return of(plan).pipe(delay(1800));
   }
 
@@ -327,7 +309,7 @@ Respond in 1-2 paragraphs max. Be specific, practical, and motivating.
       email: '',
       fitnessLevel: plan.fitnessLevel,
       goals: [reason],
-      goal: 'hypertrophy', 
+      goal: 'hypertrophy',
       age: 30,
       weight: 75,
       limitations: [],
@@ -663,4 +645,3 @@ Respond in 1-2 paragraphs max. Be specific, practical, and motivating.
     };
   }
 }
-

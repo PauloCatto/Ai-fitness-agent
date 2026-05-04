@@ -1,77 +1,84 @@
-# AI Fitness Agent 🏋️‍♂️🤖
+# 🏋️‍♂️ AI Fitness Agent — Full Stack IA Personal Trainer
 
-O **AI Fitness Agent** é uma plataforma de treinamento inteligente baseada em IA, projetada para criar, monitorar e ajustar planos de treino personalizados de forma autônoma. Utilizando uma arquitetura de multi-agentes e o poder do Google Gemini, o sistema atua como um personal trainer digital que aprende com seu progresso.
+O **AI Fitness Agent** é uma plataforma de treinamento inteligente de última geração que combina a potência do **Angular 19** com um backend robusto em **ASP.NET Core 9** e a inteligência artificial do **Google Gemini Pro**.
 
-## 🌟 Visão Geral
+![Versão](https://img.shields.io/badge/version-1.0.0-brightgreen)
+![Angular](https://img.shields.io/badge/Angular-19-DD0031?logo=angular)
+![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-4169E1?logo=postgresql)
+![AI](https://img.shields.io/badge/AI-Gemini_Pro-orange?logo=google-gemini)
 
-Diferente de aplicativos de treino estáticos, este sistema utiliza **Agentes de IA especializados** que colaboram para otimizar sua jornada fitness:
-- **Planejador (PlannerAgent):** Cria treinos sob medida baseados no seu perfil, objetivos e limitações.
-- **Monitor de Progresso (ProgressAgent):** Analisa seu feedback pós-treino e ajusta a dificuldade dinamicamente.
-- **Monitor de Recuperação (RecoveryAgent):** Avalia tendências de fadiga para prevenir overtraining.
-- **Coach IA (CoachAgent):** Fornece orientações estratégicas e motivação personalizada.
+## ✨ Funcionalidades Principais
 
-## 🚀 Principais Funcionalidades
+*   **🧠 Geração de Treino por IA**: Planos de treino 100% personalizados baseados no seu perfil, nível e limitações.
+*   **🛡️ Autenticação Segura**: Sistema de login/registro com JWT e criptografia BCrypt.
+*   **📊 Dashboard de Evolução**: Acompanhamento de carga, volume e fadiga muscular em tempo real.
+*   **💎 UI/UX Premium**: Interface moderna com Glassmorphism, animações Stagger e design Split-screen.
+*   **🔄 Persistência Inteligente**: Sincronização automática entre cache local e banco de dados PostgreSQL (Neon).
 
-- **Onboarding Inteligente:** Coleta de dados completa incluindo limitações físicas e objetivos específicos.
-- **Geração de Treino Dinâmica:** Planos que mudam conforme o usuário evolui.
-- **Feedback Loop:** Cada sessão concluída alimenta o sistema para ajustes finos.
-- **Painel de Controle Rico:** Gráficos de volume, fadiga e logs detalhados das decisões tomadas pela IA.
-- **Interface Premium:** Design moderno com glassmorphism, animações suaves e modo escuro nativo.
+## 🚀 Tech Stack
 
-## 🛠️ Stack Tecnológica
+### Frontend
+- **Framework**: Angular 19 (Standalone Components)
+- **Estilização**: Vanilla CSS com Design System moderno
+- **Estado**: StateService reativo com RxJS
+- **Animações**: CSS Keyframes & Angular Animations
 
-- **Frontend:** Angular 19+ (Stand-alone components, Reactive Forms, RxJS).
-- **Estilo:** SCSS com Design Tokens personalizados.
-- **Gráficos:** Chart.js.
-- **IA:** Google Gemini API (via AI Service customizado).
-- **Banco de Dados/Auth:** Firebase Firestore & Authentication.
-- **Change Detection:** Zoneless (para máxima performance).
+### Backend
+- **Framework**: ASP.NET Core 9 (Web API)
+- **Banco de Dados**: PostgreSQL com Neon Serverless
+- **ORM**: Entity Framework Core
+- **Segurança**: JWT (JSON Web Tokens)
+- **IA**: Integração direta com Google Generative AI (Gemini)
 
-## 📦 Estrutura do Projeto
-
-```text
-src/app/
-├── core/               # Singleton services, models e IA Agents
-│   ├── agents/         # Lógica central dos multi-agentes
-│   ├── services/       # Firebase, AI e Firestore services
-│   └── state/          # Gerenciamento de estado (BehaviorSubjects)
-├── features/           # Módulos e roteamento de funcionalidades
-│   ├── dashboard/      # Painel principal e gráficos
-│   └── workout/        # Visualização de plano e feedback
-├── shared/             # Componentes, pipes e componentes reutilizáveis
-└── styles/             # Design System e resets globais
-```
-
-## ⚙️ Configuração e Instalação
+## 🛠️ Como Executar o Projeto
 
 ### Pré-requisitos
-- Node.js 20+
-- Angular CLI
-- Uma chave da API Gemini (opcional, simulada por padrão)
+- Node.js 18+
+- .NET 9 SDK
+- Conta no [Neon.tech](https://neon.tech) (PostgreSQL)
+- Google AI API Key (Gemini)
 
-### Passo a Passo
-1. Clone o repositório.
-2. Instale as dependências:
-   ```bash
-   npm install
-   ```
-3. Configure as chaves de API em `src/environments/environment.ts`.
-4. Inicie o servidor de desenvolvimento:
-   ```bash
-   ng serve
-   ```
-5. Acesse `http://localhost:4200`.
-
-## 🧪 Testes
-
-Para rodar os testes unitários:
+### 1. Configurando o Backend
 ```bash
-npm test
+cd ../AiFitnessAgent.Api
+# Restaure as dependências
+dotnet restore
+# Configure sua ConnectionString no appsettings.json
+# Execute as migrações
+dotnet ef database update
+# Inicie o servidor
+dotnet run
+```
+*O servidor estará rodando em `http://localhost:5294`*
+
+### 2. Configurando o Frontend
+```bash
+cd ai-fitness-agent
+# Instale as dependências
+npm install
+# Configure sua Gemini API Key em environments/environment.ts
+# Inicie a aplicação
+npm start
+```
+*Acesse em `http://localhost:4200`*
+
+## 📁 Estrutura de Pastas
+
+```text
+├── ai-fitness-agent (Frontend)
+│   ├── src/app/core/agents (Lógica de IA e Persistência)
+│   ├── src/app/features (Páginas: Auth, Workout, Onboarding)
+│   └── src/app/shared (Componentes e Pipes comuns)
+└── AiFitnessAgent.Api (Backend)
+    ├── Controllers (Endpoints de Auth e Usuários)
+    ├── Models (Entidades do Banco de Dados)
+    └── Services (Lógica de JWT e IA)
 ```
 
-## 📄 Licença
+## 🤝 Contribuição
 
-Este projeto é para fins educacionais e de demonstração tecnológica.
+Este é um projeto focado em demonstrar a integração de IA em aplicações Full Stack modernas. Sinta-se à vontade para abrir Issues ou Pull Requests.
 
 ---
-*Desenvolvido com ❤️ e IA para transformar sua rotina de treinos.*
+Desenvolvido com ❤️ e Inteligência Artificial.

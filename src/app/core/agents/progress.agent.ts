@@ -3,7 +3,6 @@ import { Subject, Subscription, combineLatest } from 'rxjs';
 import { filter, tap, switchMap, catchError, EMPTY, withLatestFrom } from 'rxjs';
 import { StateService } from '../state/state.service';
 import { AiService } from '../services/ai.service';
-import { FirestoreService } from '../services/firestore.service';
 import { AgentDecision, WorkoutPlan, SessionFeedback } from '../models';
 
 
@@ -11,11 +10,7 @@ import { AgentDecision, WorkoutPlan, SessionFeedback } from '../models';
 export class ProgressAgent implements OnDestroy {
   private readonly state = inject(StateService);
   private readonly aiService = inject(AiService);
-  private readonly firestore = inject(FirestoreService);
-
   private readonly subscriptions = new Subscription();
-
-  
   private readonly _recalculate$ = new Subject<void>();
 
   constructor() {
@@ -23,17 +18,13 @@ export class ProgressAgent implements OnDestroy {
     this.initRecalculationStream();
   }
 
-  
 
-  
   recalculate(): void {
     this._recalculate$.next();
   }
 
-  
 
   private initFeedbackStream(): void {
-    
     const sub = this.state.session$
       .pipe(
         filter((session) => session !== null && session.feedback !== undefined),
@@ -55,7 +46,6 @@ export class ProgressAgent implements OnDestroy {
           );
 
           this.updateProgressMetrics(session.feedback, plan);
-          this.persistSession();
         }),
         switchMap(([session, plan]) => {
           if (!session || !plan) return EMPTY;
@@ -76,7 +66,7 @@ export class ProgressAgent implements OnDestroy {
         }),
         tap((adjustedPlan) => {
           this.state.setWorkoutPlan(adjustedPlan);
-          
+
           const levels: Record<string, string> = {
             beginner: 'iniciante',
             intermediate: 'intermediário',
@@ -109,8 +99,6 @@ export class ProgressAgent implements OnDestroy {
     this.subscriptions.add(sub);
   }
 
-  
-
   private updateProgressMetrics(feedback: SessionFeedback, plan: WorkoutPlan | null): void {
     const current = this.state.getCurrentProgress();
     const sessionsCompleted = current.sessionsCompleted + 1;
@@ -130,14 +118,6 @@ export class ProgressAgent implements OnDestroy {
     });
   }
 
-  private persistSession(): void {
-    const session = this.state.getCurrentSession();
-    if (session) {
-      this.firestore.saveSession(session).subscribe();
-    }
-  }
-
-  
 
   private emitDecision(
     reason: string,

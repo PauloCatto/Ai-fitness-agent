@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
 import { StateService } from '../../core/state/state.service';
-import { FirestoreService } from '../../core/services/firestore.service';
+import { UserService } from '../../core/services/user.service';
+import { ToastService } from '../../core/services/toast.service';
 import { PlannerAgent } from '../../core/agents/planner.agent';
 import { GoalType, FitnessLevel, PhysicalLimitation, UserProfile } from '../../core/models';
 
@@ -16,12 +17,11 @@ import { GoalType, FitnessLevel, PhysicalLimitation, UserProfile } from '../../c
 })
 export class OnboardingComponent {
   private readonly state = inject(StateService);
-  private readonly firestore = inject(FirestoreService);
+  private readonly userService = inject(UserService);
+  private readonly toast = inject(ToastService);
   private readonly planner = inject(PlannerAgent);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
-
-
   readonly totalSteps = 5;
   readonly currentStep = signal(1);
   readonly isLoading = signal(false);
@@ -30,11 +30,9 @@ export class OnboardingComponent {
     Math.round(((this.currentStep() - 1) / this.totalSteps) * 100),
   );
 
-
   readonly nameCtrl = new FormControl<string>('', Validators.required);
   readonly ageCtrl = new FormControl<number | null>(null, [Validators.required, Validators.min(13), Validators.max(100)]);
   readonly weightCtrl = new FormControl<number | null>(null, [Validators.required, Validators.min(30), Validators.max(300)]);
-
 
   readonly goals: { value: GoalType; label: string; icon: string; description: string }[] = [
     { value: 'hypertrophy', label: 'Hipertrofia', icon: '💪', description: 'Ganhar massa muscular' },
@@ -44,8 +42,6 @@ export class OnboardingComponent {
   ];
 
   readonly goalCtrl = new FormControl<GoalType | null>(null, Validators.required);
-
-
   readonly levels: { value: FitnessLevel; label: string; icon: string; description: string }[] = [
     { value: 'beginner', label: 'Iniciante', icon: '🌱', description: 'Até 6 meses de treino' },
     { value: 'intermediate', label: 'Intermediário', icon: '⚡', description: '6 meses a 2 anos' },
@@ -53,8 +49,6 @@ export class OnboardingComponent {
   ];
 
   readonly levelCtrl = new FormControl<FitnessLevel | null>(null, Validators.required);
-
-
   readonly frequencies = [2, 3, 4, 5, 6];
   readonly daysCtrl = new FormControl<number | null>(null, [
     Validators.required,
@@ -116,29 +110,40 @@ export class OnboardingComponent {
 
     this.isLoading.set(true);
 
-    const profile: UserProfile = {
-      ...base,
+    const payload = {
       displayName: this.nameCtrl.value!,
-      fitnessLevel: this.levelCtrl.value!,
-      goal: this.goalCtrl.value!,
-      goals: [this.goalCtrl.value!],
       age: this.ageCtrl.value!,
       weight: this.weightCtrl.value!,
+      goal: this.goalCtrl.value!,
+      fitnessLevel: this.levelCtrl.value!,
       limitations: [...this.selectedLimitations],
       injuries: this.injuriesCtrl.value?.trim() ?? '',
-      onboardingCompleted: true,
-      preferences: {
-        daysPerWeek: this.daysCtrl.value!,
-        sessionDurationMinutes: 60,
-        availableEquipment: ['barbell', 'dumbbell', 'machine', 'bodyweight'],
-        focusAreas: ['chest', 'back', 'legs', 'core'],
-      },
+      daysPerWeek: this.daysCtrl.value!,
     };
 
-    this.state.setUser(profile);
-    this.firestore.saveUserProfile(profile).subscribe();
-    this.planner.requestPlan(profile);
-    this.router.navigate(['/workout']);
+    this.userService.saveOnboarding(payload).subscribe({
+      next: () => {
+        const profile: UserProfile = {
+          ...base,
+          ...payload,
+          goals: [payload.goal as GoalType],
+          onboardingCompleted: true,
+          preferences: {
+            daysPerWeek: payload.daysPerWeek,
+            sessionDurationMinutes: 60,
+            availableEquipment: ['barbell', 'dumbbell', 'machine', 'bodyweight'],
+            focusAreas: ['chest', 'back', 'legs', 'core'],
+          },
+        };
+        this.state.setUser(profile);
+        this.planner.requestPlan(profile);
+        this.toast.show('💪 Perfil salvo! Gerando seu plano de treinos...', 'success');
+        this.router.navigate(['/workout']);
+      },
+      error: (err) => {
+        this.toast.show('Erro ao salvar perfil: ' + err.message, 'error');
+        this.isLoading.set(false);
+      }
+    });
   }
 }
-

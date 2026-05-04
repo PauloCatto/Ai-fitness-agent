@@ -1,19 +1,23 @@
-import { Component, inject } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { StateService } from './core/state/state.service';
 import { AuthService } from './core/services/auth.service';
-import { Router } from '@angular/router';
+import { PersistenceAgent } from './core/agents/persistence.agent';
+import { ToastComponent } from './shared/components/toast/toast.component';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, AsyncPipe, CommonModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, AsyncPipe, CommonModule, ToastComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App {
+export class App implements OnInit {
   private readonly state = inject(StateService);
   private readonly auth = inject(AuthService);
+  private readonly persistence = inject(PersistenceAgent);
   private readonly router = inject(Router);
 
   readonly user$ = this.state.user$;
@@ -21,6 +25,25 @@ export class App {
   readonly isLoading$ = this.state.isLoading$;
   readonly agentDecisions$ = this.state.agentDecisions$;
   readonly fatigue$ = this.state.fatigue$;
+
+  private readonly url = toSignal(
+    this.router.events.pipe(
+      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+      map(e => e.urlAfterRedirects)
+    )
+  );
+
+  ngOnInit(): void {
+    this.auth.initializeSession().subscribe();
+  }
+
+  isLoginPage = computed(() => this.url()?.includes('/login') ?? true);
+
+  isSidebarCollapsed = signal(false);
+
+  toggleSidebar(): void {
+    this.isSidebarCollapsed.update(v => !v);
+  }
 
   signOut(): void {
     this.auth.signOut().subscribe(() => {
@@ -34,4 +57,3 @@ export class App {
     return '🟢';
   }
 }
-
