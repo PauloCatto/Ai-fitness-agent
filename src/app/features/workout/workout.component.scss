@@ -9,8 +9,6 @@
   }
 }
 
-
-
 .athlete-context {
   margin-bottom: 2rem;
   background: var(--bg-2);
@@ -46,7 +44,9 @@
   padding: 0.25rem 1rem;
   flex-shrink: 0;
 
-  &:first-child { padding-left: 0; }
+  &:first-child {
+    padding-left: 0;
+  }
 }
 
 .ps-divider {
@@ -127,7 +127,10 @@
     .stat-value {
       color: #f87171;
     }
-    .stat-icon { flex-shrink: 0; }
+
+    .stat-icon {
+      flex-shrink: 0;
+    }
   }
 }
 
@@ -241,7 +244,8 @@
     text-transform: uppercase;
   }
 
-  input, select {
+  input,
+  select {
     width: 100%;
     background: var(--card);
     border: 1px solid var(--border);
@@ -346,14 +350,37 @@
   }
 }
 
-.context-icon { display: none; }
-.context-info { display: none; }
-.context-label { display: none; }
-.context-value { display: none; }
-.context-badges { display: none; }
-.context-card { display: none; }
-.limitation-tags { display: none; }
-.limitation-tag { display: none; }
+.context-icon {
+  display: none;
+}
+
+.context-info {
+  display: none;
+}
+
+.context-label {
+  display: none;
+}
+
+.context-value {
+  display: none;
+}
+
+.context-badges {
+  display: none;
+}
+
+.context-card {
+  display: none;
+}
+
+.limitation-tags {
+  display: none;
+}
+
+.limitation-tag {
+  display: none;
+}
 
 .workout-header {
   display: flex;
@@ -384,8 +411,15 @@
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
 }
 
 h1 {
@@ -454,7 +488,11 @@ h1 {
   padding: 1rem 1.25rem;
   margin-bottom: 1.25rem;
 
-  .reasoning-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .reasoning-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
 
   p {
     font-size: 0.875rem;
@@ -463,8 +501,6 @@ h1 {
     margin: 0;
   }
 }
-
-
 
 .fatigue-banner {
   border-radius: var(--radius-sm);
@@ -486,8 +522,6 @@ h1 {
   }
 }
 
-
-
 .day-tabs {
   display: flex;
   gap: 0.375rem;
@@ -495,8 +529,14 @@ h1 {
   overflow-x: auto;
   padding-bottom: 0.25rem;
 
-  &::-webkit-scrollbar { height: 3px; }
-  &::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  &::-webkit-scrollbar {
+    height: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 2px;
+  }
 }
 
 .day-tab {
@@ -523,8 +563,13 @@ h1 {
     border-color: rgba(163, 230, 53, 0.35);
   }
 
-  &.rest { opacity: 0.6; }
-  &.rest.active { opacity: 1; }
+  &.rest {
+    opacity: 0.6;
+  }
+
+  &.rest.active {
+    opacity: 1;
+  }
 }
 
 .tab-label {
@@ -532,7 +577,9 @@ h1 {
   font-weight: 600;
   color: var(--text-2);
 
-  .active & { color: var(--accent); }
+  .active & {
+    color: var(--accent);
+  }
 }
 
 .tab-indicator {
@@ -541,13 +588,9 @@ h1 {
   border-radius: 50%;
   background: var(--accent);
 
-  &.rest { background: var(--text-3); }
-}
-
-
-
-.day-content {
-  
+  &.rest {
+    background: var(--text-3);
+  }
 }
 
 .day-header {
@@ -630,7 +673,9 @@ h1 {
   border-radius: var(--radius-lg);
   text-align: center;
 
-  .rest-icon { font-size: 3rem; }
+  .rest-icon {
+    font-size: 3rem;
+  }
 
   h3 {
     font-size: 1.125rem;
@@ -647,8 +692,6 @@ h1 {
     max-width: 380px;
   }
 }
-
-
 
 .exercise-list {
   display: flex;
@@ -686,9 +729,9 @@ h1 {
   }
 }
 
-.exercise-card-full { flex: 1; }
-
-
+.exercise-card-full {
+  flex: 1;
+}
 
 .feedback-section {
   margin-top: 2rem;
@@ -741,21 +784,34 @@ h1 {
     background: rgba(74, 222, 128, 0.08);
     border-color: rgba(74, 222, 128, 0.25);
     color: var(--success);
-    &:hover { background: rgba(74, 222, 128, 0.15); transform: translateY(-2px); }
+
+    &:hover {
+      background: rgba(74, 222, 128, 0.15);
+      transform: translateY(-2px);
+    }
   }
 
   &.done {
     background: var(--accent-dim);
     border-color: rgba(163, 230, 53, 0.3);
     color: var(--accent);
-    &:hover { background: rgba(163, 230, 53, 0.2); transform: translateY(-2px); box-shadow: 0 4px 16px var(--accent-glow); }
+
+    &:hover {
+      background: rgba(163, 230, 53, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px var(--accent-glow);
+    }
   }
 
   &.hard {
     background: rgba(248, 113, 113, 0.08);
     border-color: rgba(248, 113, 113, 0.25);
     color: var(--error);
-    &:hover { background: rgba(248, 113, 113, 0.15); transform: translateY(-2px); }
+
+    &:hover {
+      background: rgba(248, 113, 113, 0.15);
+      transform: translateY(-2px);
+    }
   }
 }
 
@@ -770,7 +826,9 @@ h1 {
   border-radius: var(--radius-md);
 }
 
-.feedback-sent-icon { font-size: 2rem; }
+.feedback-sent-icon {
+  font-size: 2rem;
+}
 
 .feedback-sent-title {
   font-size: 0.9375rem;
@@ -785,8 +843,6 @@ h1 {
   margin: 0;
 }
 
-
-
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -796,10 +852,23 @@ h1 {
   text-align: center;
   gap: 1rem;
 
-  .empty-icon { font-size: 4rem; margin-bottom: 0.5rem; }
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 0.5rem;
+  }
 
-  h2 { font-size: 1.5rem; font-weight: 700; color: var(--text-1); margin: 0; }
-  p { font-size: 0.9rem; color: var(--text-2); margin: 0; }
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-1);
+    margin: 0;
+  }
+
+  p {
+    font-size: 0.9rem;
+    color: var(--text-2);
+    margin: 0;
+  }
 }
 
 .btn-primary-lg {
@@ -825,8 +894,6 @@ h1 {
   }
 }
 
-
-
 .error-bar {
   position: fixed;
   bottom: 2rem;
@@ -839,4 +906,3 @@ h1 {
   color: var(--error);
   font-size: 0.875rem;
 }
-
