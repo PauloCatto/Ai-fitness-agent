@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
-import { Observable, of, delay, throwError, from, switchMap } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { Injectable, inject } from '@angular/core';
+import { Observable, of, delay, throwError, from, switchMap, firstValueFrom } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { map, catchError, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import {
   UserProfile,
@@ -16,6 +17,16 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class AiService {
+  private readonly http = inject(HttpClient);
+  private cachedApiKey: string | null = null;
+
+  private async fetchApiKey(): Promise<string> {
+    if (this.cachedApiKey) return this.cachedApiKey;
+    const res = await firstValueFrom(this.http.get<{ apiKey: string }>('/config/gemini-key'));
+    this.cachedApiKey = res.apiKey;
+    return res.apiKey;
+  }
+
   generateWorkout(profile: UserProfile): Observable<WorkoutPlan> {
     if (environment.useMockAi) {
       return this.mockGenerateWorkout(profile);
@@ -49,9 +60,10 @@ export class AiService {
   }
 
   private async getGeminiModel() {
+    const apiKey = await this.fetchApiKey();
     const { GoogleGenerativeAI } = await import('@google/generative-ai');
-    const genAI = new GoogleGenerativeAI(environment.geminiApiKey);
-    return genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const genAI = new GoogleGenerativeAI(apiKey);
+    return genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
   }
 
   private geminiGenerateWorkout(
@@ -94,7 +106,7 @@ export class AiService {
           .catch((err) => observer.error(err));
       });
 
-      return () => {};
+      return () => { };
     });
   }
 
@@ -198,13 +210,20 @@ Respond in 2-3 concise paragraphs. Be encouraging and specific.
 
   private buildChatPrompt(message: string, context: string): string {
     return `
-You are an AI fitness coach. Answer the user's fitness question concisely and helpfully.
+Você é o "Elite Fitness Coach", um especialista em fisiologia do exercício, nutrição esportiva e psicologia do bem-estar.
+Sua missão é fornecer orientações técnicas, seguras e extremamente motivadoras.
 
-${context ? `Context: ${context}` : ''}
+${context ? `CONTEXTO ATUAL DO ATLETA: ${context}` : ''}
 
-User: ${message}
+DIRETRIZES DE RESPOSTA:
+1. Seja técnico mas acessível. Use termos como "sobrecarga progressiva", "síntese proteica" e "déficit calórico" quando apropriado.
+2. Seja empático e encorajador.
+3. Se a pergunta for fora do escopo de fitness/saúde, tente gentilmente trazer o foco de volta para o bem-estar.
+4. Mantenha a resposta em no máximo 2-3 parágrafos curtos.
 
-Respond in 1-2 paragraphs max. Be specific, practical, and motivating.
+PERGUNTA DO USUÁRIO: ${message}
+
+Responda em português brasileiro.
 `.trim();
   }
 
@@ -295,11 +314,20 @@ Respond in 1-2 paragraphs max. Be specific, practical, and motivating.
   }
 
   private buildChatMockResponse(message: string): string {
-    const responses = [
-      `Excelente pergunta sobre treino! O princípio fundamental aqui é a sobrecarga progressiva — aumentar continuamente o desafio imposto aos seus músculos ao longo do tempo. Seja com mais peso, mais repetições ou menos descanso, seu corpo precisa de um motivo para se adaptar e ficar mais forte. Priorize movimentos compostos como agachamento, levantamento terra e supino como base, e adicione exercícios de isolamento complementares. A recuperação é igualmente importante: busque 7 a 9 horas de sono e garanta ingestão adequada de proteína (1,6 a 2,2g por kg de peso corporal). Você consegue!`,
-      `Nutrição e treino são dois lados da mesma moeda para ${message.toLowerCase().includes('peso') ? 'o controle de peso' : 'a melhora do desempenho'}. Nos dias de treino, consuma carboidratos suficientes para abastecer sua sessão. Após o treino, priorize a proteína nos primeiros 30 a 60 minutos para iniciar a síntese proteica muscular. A hidratação é frequentemente negligenciada, mas é fundamental — busque pelo menos 2 a 3 litros de água por dia, mais nos dias de treino intenso. Pequenos hábitos consistentes se somam em resultados expressivos ao longo do tempo.`,
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
+    const msg = message.toLowerCase();
+    if (msg.includes('sexo')) {
+      return `O sexo é uma atividade física moderada que pode complementar seu estilo de vida ativo. Em termos de gasto calórico, não substitui um treino intenso, mas contribui para o bem-estar hormonal e redução do estresse, o que indiretamente ajuda na recuperação muscular. O mais importante é o equilíbrio!`;
+    }
+    if (msg.includes('nutrição') || msg.includes('comer') || msg.includes('dieta')) {
+      return `A nutrição é a base dos seus resultados. Priorize proteínas para reconstrução muscular (1.6g a 2.2g por kg) e carboidratos complexos para energia. Não esqueça dos micronutrientes vindos de vegetais e da hidratação constante.`;
+    }
+    if (msg.includes('treino') || msg.includes('exercício') || msg.includes('academia')) {
+      return `Seu treino deve ser focado em sobrecarga progressiva. Tente aumentar a carga, o volume ou diminuir o descanso gradualmente. A técnica correta é sempre superior ao peso bruto para evitar lesões.`;
+    }
+    if (msg.includes('descanso') || msg.includes('sono') || msg.includes('recuperação')) {
+      return `O músculo cresce no descanso, não no treino. Garanta 7-9 horas de sono de qualidade e dias de descanso total ou ativo para permitir a reparação tecidual.`;
+    }
+    return `Essa é uma excelente dúvida! Para o seu nível e objetivo, o foco deve ser na consistência. Pequenos ajustes diários na sua rotina de treino e alimentação trarão os maiores resultados a longo prazo. Como posso detalhar mais algum desses pontos para você?`;
   }
 
   private buildAdjustmentProfile(plan: WorkoutPlan, reason: string): UserProfile {
