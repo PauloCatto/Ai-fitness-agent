@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { Observable, tap, throwError, switchMap, of, forkJoin, catchError, map } from 'rxjs';
 import { UserProfile, AuthResponse } from '../models';
 import { StateService } from '../state/state.service';
@@ -12,7 +13,8 @@ export class AuthService {
   constructor(
     private readonly state: StateService,
     private readonly api: ApiService,
-    private readonly ai: AiService
+    private readonly ai: AiService,
+    private readonly router: Router
   ) {}
 
   login(email: string, password: string): Observable<UserProfile> {
@@ -60,12 +62,10 @@ export class AuthService {
   }
 
   signOut(): Observable<void> {
-    return new Observable(observer => {
-      localStorage.removeItem(this.TOKEN_KEY);
-      this.state.setUser(null);
-      observer.next();
-      observer.complete();
-    });
+    localStorage.removeItem(this.TOKEN_KEY);
+    this.state.setUser(null);
+    this.router.navigate(['/login']);
+    return of(void 0);
   }
 
   signInAsDemo(): void {

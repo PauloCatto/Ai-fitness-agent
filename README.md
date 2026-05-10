@@ -2,7 +2,7 @@
 
 [![Angular](https://img.shields.io/badge/Angular-21-DD0031?style=for-the-badge&logo=angular)](https://angular.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
-[![RxJS](https://img.shields.io/badge/RxJS-Reactive-B71C1C?style=for-the-badge&logo=reactivex)](https://rxjs.dev/)
+[![Vercel](https://img.shields.io/badge/Vercel-Production-black?style=for-the-badge&logo=vercel)](https://ai-fitness-agent.vercel.app)
 [![UI/UX](https://img.shields.io/badge/UI/UX-Premium_Glassmorphism-blue?style=for-the-badge)](https://dribbble.com/)
 
 A interface de última geração para o seu Personal Trainer IA. Desenvolvido com **Angular 21**, o frontend do AI Fitness Agent oferece uma experiência premium, reativa e inteligente para transformar a forma como você treina.
@@ -32,6 +32,7 @@ O projeto utiliza o que há de mais moderno no ecossistema Angular e padrões de
 - **IA**: Google Generative AI SDK (Gemini Integration)
 - **Estilização**: CSS Moderno (Glassmorphism & Keyframes)
 - **Comunicação**: HttpClient + Interceptors JWT
+- **Hospedagem**: [Vercel (ai-fitness-agent.vercel.app)](https://ai-fitness-agent.vercel.app)
 
 ## 📁 Estrutura de Pastas
 
@@ -70,6 +71,10 @@ src/app/
     npm start
     ```
     *Acesse em `http://localhost:4200`*
+
+### 🚀 Deploy em Produção
+O app é buildado automaticamente na Vercel a cada push na branch `master`.
+- **URL Oficial**: [https://ai-fitness-agent.vercel.app](https://ai-fitness-agent.vercel.app)
 
 ---
 Desenvolvido com ❤️ por **Paulo Catto**.
