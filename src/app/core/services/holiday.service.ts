@@ -21,6 +21,8 @@ export class HolidayService {
 
   getNextHoliday(): Observable<Holiday | null> {
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     return this.getHolidays().pipe(
       map(holidays => {
         const futureHolidays = holidays

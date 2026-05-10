@@ -238,14 +238,3 @@ export interface Holiday {
   type: string;
 }
 
-export interface WorkoutOption {
-  value: string;
-  label: string;
-  icon?: string;
-  description?: string;
-}
-
-export interface WorkoutOptionsResponse {
-  splits: WorkoutOption[];
-  muscleGroups: WorkoutOption[];
-}
