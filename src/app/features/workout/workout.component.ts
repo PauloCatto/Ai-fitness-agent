@@ -1,20 +1,29 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { AsyncPipe, CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { interval, Subscription } from 'rxjs';
 import { StateService } from '../../core/state/state.service';
 import { PlannerAgent } from '../../core/agents/planner.agent';
-import { ProgressAgent } from '../../core/agents/progress.agent';
 import { ExerciseCardComponent } from '../../shared/components/exercise-card/exercise-card.component';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
-import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { DurationPipe } from '../../shared/pipes/duration.pipe';
-import { WorkoutDay, WorkoutSession, SessionFeedback, GoalType, FitnessLevel, UserProfile, PhysicalLimitation } from '../../core/models';
+import { TimerPipe } from '../../shared/pipes/timer.pipe';
+import { WorkoutDay, WorkoutSession, SessionFeedback, GoalType, FitnessLevel, UserProfile, PhysicalLimitation, MuscleGroup, Exercise } from '../../core/models';
+import { WorkoutOption } from '../../core/models/api.models';
 import { UserService } from '../../core/services/user.service';
+import { AiService } from '../../core/services/ai.service';
 
 @Component({
   selector: 'app-workout',
   standalone: true,
-  imports: [CommonModule, AsyncPipe, ReactiveFormsModule, ExerciseCardComponent, LoadingSpinnerComponent, SkeletonComponent, DurationPipe],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    LoadingSpinnerComponent,
+    DurationPipe,
+    TimerPipe,
+    ExerciseCardComponent
+  ],
   templateUrl: './workout.component.html',
   styleUrl: './workout.component.scss',
 })
@@ -22,6 +31,7 @@ export class WorkoutComponent implements OnInit {
   private readonly state = inject(StateService);
   private readonly plannerAgent = inject(PlannerAgent);
   private readonly userService = inject(UserService);
+  private readonly aiService = inject(AiService);
   private readonly fb = inject(FormBuilder);
 
   readonly plan$ = this.state.workoutPlan$;
@@ -34,7 +44,20 @@ export class WorkoutComponent implements OnInit {
   showReasoning: boolean = false;
   sessionFeedbackSent: boolean = false;
   isEditingProfile: boolean = false;
+  isRegenerating: boolean = false;
   completedExerciseIds = new Set<string>();
+  reasoningText: string = '';
+  isExplaining: boolean = false;
+  isTrainingActive: boolean = false;
+  trainingStartTime: number | null = null;
+  elapsedTime: number = 0;
+  private timerSubscription?: Subscription;
+
+  isSwapping: boolean = false;
+  currentSessionId: string = crypto.randomUUID();
+
+  workoutSplits: WorkoutOption[] = [];
+  availableMuscleGroups: WorkoutOption[] = [];
 
   readonly availableLimitations: PhysicalLimitation[] = ['joelho', 'ombro', 'lombar', 'quadril', 'tornozelo', 'cervical', 'punho'];
   readonly profileForm = this.fb.group({
@@ -44,10 +67,27 @@ export class WorkoutComponent implements OnInit {
     goal: ['' as GoalType, Validators.required],
     fitnessLevel: ['' as FitnessLevel, Validators.required],
     daysPerWeek: [0, [Validators.required, Validators.min(2), Validators.max(6)]],
+    workoutSplit: ['ai_choice', Validators.required],
+    focusAreas: [[] as string[]],
+    cardioMinutes: [0, [Validators.required, Validators.min(0), Validators.max(60)]],
     limitations: [[] as PhysicalLimitation[]],
   });
 
+  selectedRestTime: number = 60;
+  readonly restOptions = [
+    { value: 30, label: '30 seg (Curto)' },
+    { value: 45, label: '45 seg (Médio)' },
+    { value: 60, label: '60 seg (Padrão)' },
+    { value: 90, label: '90 seg (Longo)' },
+    { value: 120, label: '120 seg (Pesado)' },
+  ];
+
   ngOnInit(): void {
+    this.userService.getWorkoutOptions().subscribe(options => {
+      this.workoutSplits = options.splits;
+      this.availableMuscleGroups = options.muscleGroups;
+    });
+
     const user = this.state.getCurrentUser();
     const plan = this.state.getCurrentWorkoutPlan();
     if (user && !plan) {
@@ -57,7 +97,51 @@ export class WorkoutComponent implements OnInit {
 
   generatePlan(): void {
     const user = this.state.getCurrentUser();
-    if (user) this.plannerAgent.requestPlan(user);
+    if (user) {
+      this.isRegenerating = true;
+      this.profileForm.patchValue({
+        workoutSplit: user.preferences?.workoutSplit || 'ai_choice',
+        focusAreas: user.preferences?.focusAreas || [],
+      });
+    }
+  }
+
+  confirmRegeneration(): void {
+    const user = this.state.getCurrentUser();
+    if (!user) return;
+
+    const updated: UserProfile = {
+      ...user,
+      preferences: {
+        ...user.preferences,
+        workoutSplit: this.profileForm.value.workoutSplit!,
+        focusAreas: (this.profileForm.value.focusAreas as any[]) || [],
+      },
+    };
+
+    this.state.setUser(updated);
+    this.plannerAgent.requestPlan(updated);
+    this.isRegenerating = false;
+  }
+
+  cancelRegeneration(): void {
+    this.isRegenerating = false;
+  }
+
+  toggleFocusArea(muscleValue: string): void {
+    const current = this.profileForm.value.focusAreas || [];
+    let updated: string[];
+    if (current.includes(muscleValue)) {
+      updated = current.filter(m => m !== muscleValue);
+    } else {
+      updated = [...current, muscleValue];
+    }
+    this.profileForm.patchValue({ focusAreas: updated });
+  }
+
+  isFocusAreaSelected(muscle: string): boolean {
+    const current = this.profileForm.value.focusAreas || [];
+    return (current as string[]).includes(muscle);
   }
 
   selectDay(index: number): void {
@@ -67,10 +151,16 @@ export class WorkoutComponent implements OnInit {
   }
 
   toggleExercise(exerciseId: string): void {
-    if (this.completedExerciseIds.has(exerciseId)) {
-      this.completedExerciseIds.delete(exerciseId);
-    } else {
+    const isNowCompleted = !this.completedExerciseIds.has(exerciseId);
+
+    if (isNowCompleted) {
       this.completedExerciseIds.add(exerciseId);
+    } else {
+      this.completedExerciseIds.delete(exerciseId);
+    }
+
+    if (this.isTrainingActive) {
+      this.saveCurrentSession();
     }
   }
 
@@ -90,22 +180,141 @@ export class WorkoutComponent implements OnInit {
     if (!plan || !user) return;
 
     const session: WorkoutSession = {
-      id: crypto.randomUUID(),
+      id: this.currentSessionId,
       planId: plan.id,
       userId: user.uid,
       date: new Date(),
       dayIndex: this.selectedDayIndex,
       feedback,
       completedExerciseIds: Array.from(this.completedExerciseIds),
-      durationMinutes: plan.days[this.selectedDayIndex]?.estimatedMinutes ?? 0,
+      durationMinutes: Math.ceil(this.elapsedTime / 60),
     };
 
-    this.state.setSession(session);
-    this.sessionFeedbackSent = true;
+    this.userService.saveSession(session).subscribe({
+      next: () => {
+        this.sessionFeedbackSent = true;
+        this.finishWorkout();
+      },
+      error: (err) => console.error('Erro ao finalizar sessão:', err)
+    });
+  }
+
+  startWorkout(): void {
+    this.isTrainingActive = true;
+    this.currentSessionId = crypto.randomUUID();
+    this.trainingStartTime = Date.now();
+    this.elapsedTime = 0;
+    this.sessionFeedbackSent = false;
+    this.completedExerciseIds.clear();
+
+    const user = this.state.getCurrentUser();
+    if (user) {
+      const updated: UserProfile = {
+        ...user,
+        preferences: {
+          ...user.preferences,
+          defaultRestSeconds: this.selectedRestTime
+        }
+      };
+      this.state.setUser(updated);
+      this.userService.updateProfile({
+        ...updated,
+        workoutSplit: updated.preferences.workoutSplit!,
+        focusAreas: updated.preferences.focusAreas!,
+        cardioMinutes: updated.preferences.cardioMinutes!,
+        daysPerWeek: updated.preferences.daysPerWeek,
+        defaultRestSeconds: updated.preferences.defaultRestSeconds
+      } as any).subscribe();
+    }
+
+    this.timerSubscription = interval(1000).subscribe(() => {
+      if (this.trainingStartTime) {
+        this.elapsedTime = Math.floor((Date.now() - this.trainingStartTime) / 1000);
+      }
+    });
+  }
+
+  finishWorkout(): void {
+    if (this.isTrainingActive) {
+      this.saveCurrentSession();
+    }
+    this.isTrainingActive = false;
+    this.timerSubscription?.unsubscribe();
+  }
+
+  swapExercise(oldExercise: Exercise): void {
+    const user = this.state.getCurrentUser();
+    const plan = this.state.getCurrentWorkoutPlan();
+    if (!user || !plan || this.isSwapping) return;
+
+    this.isSwapping = true;
+    this.aiService.suggestAlternative(oldExercise, user).subscribe({
+      next: (newExercise) => {
+        const updatedPlan = { ...plan };
+        const day = updatedPlan.days[this.selectedDayIndex];
+        if (day) {
+          const index = day.exercises.findIndex(e => e.id === oldExercise.id);
+          if (index !== -1) {
+            day.exercises[index] = newExercise;
+            this.state.setWorkoutPlan(updatedPlan);
+          }
+        }
+        this.isSwapping = false;
+      },
+      error: () => {
+        this.isSwapping = false;
+        alert('Não foi possível trocar o exercício no momento.');
+      }
+    });
+  }
+
+  private saveCurrentSession(feedback?: SessionFeedback): void {
+    const plan = this.state.getCurrentWorkoutPlan();
+    if (!plan) return;
+
+    const session: WorkoutSession = {
+      id: this.currentSessionId,
+      planId: plan.id,
+      userId: this.state.getCurrentUser()?.uid || '',
+      date: new Date(),
+      dayIndex: this.selectedDayIndex,
+      feedback: feedback,
+      completedExerciseIds: Array.from(this.completedExerciseIds),
+      durationMinutes: Math.ceil(this.elapsedTime / 60),
+    };
+
+    this.userService.saveSession(session).subscribe({
+      error: (err) => console.error('Erro ao salvar sessão no backend:', err)
+    });
   }
 
   toggleReasoning(): void {
     this.showReasoning = !this.showReasoning;
+
+    if (this.showReasoning && !this.reasoningText) {
+      const plan = this.state.getCurrentWorkoutPlan();
+      if (plan) {
+        this.isExplaining = true;
+        this.reasoningText = '';
+        this.aiService.explainWorkout(plan).subscribe({
+          next: (chunk) => {
+            if (chunk) {
+              this.reasoningText += chunk;
+            }
+          },
+          complete: () => {
+            this.isExplaining = false;
+          },
+          error: (err) => {
+            console.error('Erro no streaming:', err);
+            this.isExplaining = false;
+            if (!this.reasoningText) {
+              this.reasoningText = 'Falha ao gerar explicação detalhada.';
+            }
+          }
+        });
+      }
+    }
   }
 
   toggleEdit(): void {
@@ -121,6 +330,9 @@ export class WorkoutComponent implements OnInit {
         fitnessLevel: user.fitnessLevel,
         limitations: user.limitations || [],
         daysPerWeek: user.preferences?.daysPerWeek || 3,
+        workoutSplit: user.preferences?.workoutSplit || 'ai_choice',
+        focusAreas: user.preferences?.focusAreas || [],
+        cardioMinutes: user.preferences?.cardioMinutes || 0,
       });
     }
 
@@ -141,6 +353,9 @@ export class WorkoutComponent implements OnInit {
       preferences: {
         ...user.preferences,
         daysPerWeek: this.profileForm.value.daysPerWeek!,
+        workoutSplit: this.profileForm.value.workoutSplit!,
+        focusAreas: (this.profileForm.value.focusAreas as any[]) || [],
+        cardioMinutes: this.profileForm.value.cardioMinutes!,
       },
       limitations: this.profileForm.value.limitations || [],
     };
@@ -154,7 +369,10 @@ export class WorkoutComponent implements OnInit {
       fitnessLevel: updated.fitnessLevel,
       daysPerWeek: updated.preferences.daysPerWeek,
       limitations: updated.limitations,
-      injuries: updated.injuries
+      injuries: updated.injuries,
+      workoutSplit: updated.preferences.workoutSplit!,
+      focusAreas: updated.preferences.focusAreas!,
+      cardioMinutes: updated.preferences.cardioMinutes!
     }).subscribe();
     this.plannerAgent.requestPlan(updated);
     this.isEditingProfile = false;
