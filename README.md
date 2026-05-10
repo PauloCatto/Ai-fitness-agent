@@ -1,84 +1,74 @@
-# 🏋️‍♂️ AI Fitness Agent — Full Stack IA Personal Trainer
+# 🏋️‍♂️ AI Fitness Agent — Frontend
 
-O **AI Fitness Agent** é uma plataforma de treinamento inteligente de última geração que combina a potência do **Angular 19** com um backend robusto em **ASP.NET Core 9** e a inteligência artificial do **Google Gemini Pro**.
+[![Angular](https://img.shields.io/badge/Angular-19-DD0031?style=for-the-badge&logo=angular)](https://angular.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![RxJS](https://img.shields.io/badge/RxJS-Reactive-B71C1C?style=for-the-badge&logo=reactivex)](https://rxjs.dev/)
+[![UI/UX](https://img.shields.io/badge/UI/UX-Premium_Glassmorphism-blue?style=for-the-badge)](https://dribbble.com/)
 
-![Versão](https://img.shields.io/badge/version-1.0.0-brightgreen)
-![Angular](https://img.shields.io/badge/Angular-19-DD0031?logo=angular)
-![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-4169E1?logo=postgresql)
-![AI](https://img.shields.io/badge/AI-Gemini_Pro-orange?logo=google-gemini)
+A interface de última geração para o seu Personal Trainer IA. Desenvolvido com **Angular 19**, o frontend do AI Fitness Agent oferece uma experiência premium, reativa e inteligente para transformar a forma como você treina.
 
-## ✨ Funcionalidades Principais
+## ✨ Diferenciais Técnicos
 
-*   **🧠 Geração de Treino por IA**: Planos de treino 100% personalizados baseados no seu perfil, nível e limitações.
-*   **🛡️ Autenticação Segura**: Sistema de login/registro com JWT e criptografia BCrypt.
-*   **📊 Dashboard de Evolução**: Acompanhamento de carga, volume e fadiga muscular em tempo real.
-*   **💎 UI/UX Premium**: Interface moderna com Glassmorphism, animações Stagger e design Split-screen.
-*   **🔄 Persistência Inteligente**: Sincronização automática entre cache local e banco de dados PostgreSQL (Neon).
+O projeto utiliza o que há de mais moderno no ecossistema Angular e padrões de desenvolvimento de software de alto nível.
 
-## 🚀 Tech Stack
+- **🤖 Sistema Multi-Agente**: Arquitetura baseada em agentes de IA (Planner, Progress, Recovery, Coach) que colaboram para otimizar seu treino.
+- **Standalone Components**: Arquitetura moderna sem NgModules, mais leve e escalável.
+- **Reactive State Management**: Gerenciamento de estado robusto utilizando `BehaviorSubject` e `Signals` (Angular 19).
+- **Zoneless-ready**: Preparado para alta performance com detecção de mudanças otimizada.
+- **Active Workout Mode**: Cronômetro de descanso inteligente com feedback tátil (vibração) e audiovisual (Web Audio API).
 
-### Frontend
-- **Framework**: Angular 19 (Standalone Components)
-- **Estilização**: Vanilla CSS com Design System moderno
-- **Estado**: StateService reativo com RxJS
-- **Animações**: CSS Keyframes & Angular Animations
+## 🚀 Funcionalidades Premium
 
-### Backend
-- **Framework**: ASP.NET Core 9 (Web API)
-- **Banco de Dados**: PostgreSQL com Neon Serverless
-- **ORM**: Entity Framework Core
-- **Segurança**: JWT (JSON Web Tokens)
-- **IA**: Integração direta com Google Generative AI (Gemini)
+- **Painel Inteligente**: Visualize sua fadiga, volume de treino e insights da IA em um dashboard dinâmico.
+- **Onboarding Gamificado**: Processo de configuração de perfil dividido em etapas claras e intuitivas.
+- **Treino Ativo**: Interface focada na execução, permitindo controlar séries e tempos de descanso personalizados.
+- **Feedback Sensorial**: O app avisa quando o descanso acabou através de sons e vibrações, garantindo a intensidade do treino.
 
-## 🛠️ Como Executar o Projeto
+## 🛠️ Tech Stack
 
-### Pré-requisitos
-- Node.js 18+
-- .NET 9 SDK
-- Conta no [Neon.tech](https://neon.tech) (PostgreSQL)
-- Google AI API Key (Gemini)
-
-### 1. Configurando o Backend
-```bash
-cd ../AiFitnessAgent.Api
-# Restaure as dependências
-dotnet restore
-# Configure sua ConnectionString no appsettings.json
-# Execute as migrações
-dotnet ef database update
-# Inicie o servidor
-dotnet run
-```
-*O servidor estará rodando em `http://localhost:5294`*
-
-### 2. Configurando o Frontend
-```bash
-cd ai-fitness-agent
-# Instale as dependências
-npm install
-# Configure sua Gemini API Key em environments/environment.ts
-# Inicie a aplicação
-npm start
-```
-*Acesse em `http://localhost:4200`*
+- **Framework**: Angular 19
+- **Linguagem**: TypeScript
+- **Estilização**: CSS Moderno (Variables, Grid, Flexbox, Glassmorphism)
+- **Animações**: Angular Animations + Keyframes (Efeito Stagger)
+- **Comunicação**: HttpClient com Interceptor para JWT
 
 ## 📁 Estrutura de Pastas
 
 ```text
-├── ai-fitness-agent (Frontend)
-│   ├── src/app/core/agents (Lógica de IA e Persistência)
-│   ├── src/app/features (Páginas: Auth, Workout, Onboarding)
-│   └── src/app/shared (Componentes e Pipes comuns)
-└── AiFitnessAgent.Api (Backend)
-    ├── Controllers (Endpoints de Auth e Usuários)
-    ├── Models (Entidades do Banco de Dados)
-    └── Services (Lógica de JWT e IA)
+src/app/
+├── core/                # Singleton Services, Models, Guards, Interceptors
+│   ├── agents/          # Agentes de IA (PlannerAgent, ProgressAgent...)
+│   ├── services/        # Serviços de API e Infraestrutura
+│   └── state/           # Gerenciamento de Estado Global
+├── features/            # Módulos de Funcionalidades (Dashboard, Workout, Onboarding)
+└── shared/              # Componentes, Pipes e Diretivas Reutilizáveis
 ```
 
-## 🤝 Contribuição
+## 🛠️ Como Executar
 
-Este é um projeto focado em demonstrar a integração de IA em aplicações Full Stack modernas. Sinta-se à vontade para abrir Issues ou Pull Requests.
+### Pré-requisitos
+- Node.js 18+ e npm instalados.
+
+### Instalação
+
+1.  Clone o repositório.
+2.  Instale as dependências:
+    ```bash
+    npm install
+    ```
+3.  Configure as variáveis de ambiente em `src/environments/environment.ts`:
+    ```typescript
+    export const environment = {
+      production: false,
+      apiUrl: 'http://localhost:5294/api', // URL da sua API .NET
+      holidayApiUrl: 'https://brasilapi.com.br/api/feriados/v1'
+    };
+    ```
+4.  Inicie o servidor de desenvolvimento:
+    ```bash
+    npm start
+    ```
+    *Acesse em `http://localhost:4200`*
 
 ---
-Desenvolvido com ❤️ e Inteligência Artificial.
+Desenvolvido com ❤️ por **Paulo Catto**.
