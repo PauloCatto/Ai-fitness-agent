@@ -4,9 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { StateService } from '../../core/state/state.service';
 import { CoachAgent } from '../../core/agents/coach.agent';
 import { ConversationService } from '../../core/services/conversation.service';
-import { Conversation, ChatMessage } from '../../core/models';
-import { Observable, of } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { Conversation } from '../../core/models';
 
 @Component({
   selector: 'app-chat',

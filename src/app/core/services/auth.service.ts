@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Observable, tap, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { Observable, tap, throwError, switchMap, of, forkJoin, catchError, map } from 'rxjs';
 import { UserProfile, AuthResponse } from '../models';
 import { StateService } from '../state/state.service';
 import { ApiService } from './api.service';
+import { AiService } from './ai.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -11,7 +11,8 @@ export class AuthService {
 
   constructor(
     private readonly state: StateService,
-    private readonly api: ApiService
+    private readonly api: ApiService,
+    private readonly ai: AiService
   ) {}
 
   login(email: string, password: string): Observable<UserProfile> {
@@ -19,20 +20,32 @@ export class AuthService {
       tap(res => this.saveSession(res)),
       map(res => this.mapToProfile(res.user)),
       tap(profile => this.state.setUser(profile)),
+      switchMap(profile => 
+        this.ai.getLatestWorkoutPlan().pipe(
+          tap(plan => this.state.setWorkoutPlan(plan)),
+          map(() => profile)
+        )
+      ),
       catchError(err => throwError(() => new Error(err.message ?? 'Falha no login.')))
     );
   }
 
   initializeSession(): Observable<UserProfile | null> {
     const token = this.getToken();
-    if (!token) return new Observable(obs => { obs.next(null); obs.complete(); });
+    if (!token) return of(null);
 
     return this.api.get<AuthResponse['user']>('/users/profile').pipe(
       map(user => this.mapToProfile(user)),
       tap(profile => this.state.setUser(profile)),
+      switchMap(profile => 
+        this.ai.getLatestWorkoutPlan().pipe(
+          tap(plan => this.state.setWorkoutPlan(plan)),
+          map(() => profile)
+        )
+      ),
       catchError(() => {
         this.signOut();
-        return new Observable<null>(obs => { obs.next(null); obs.complete(); });
+        return of(null);
       })
     );
   }

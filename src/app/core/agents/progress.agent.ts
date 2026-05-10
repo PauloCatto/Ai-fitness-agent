@@ -5,7 +5,6 @@ import { StateService } from '../state/state.service';
 import { AiService } from '../services/ai.service';
 import { AgentDecision, WorkoutPlan, SessionFeedback } from '../models';
 
-
 @Injectable({ providedIn: 'root' })
 export class ProgressAgent implements OnDestroy {
   private readonly state = inject(StateService);
@@ -18,11 +17,9 @@ export class ProgressAgent implements OnDestroy {
     this.initRecalculationStream();
   }
 
-
   recalculate(): void {
     this._recalculate$.next();
   }
-
 
   private initFeedbackStream(): void {
     const sub = this.state.session$
@@ -99,7 +96,7 @@ export class ProgressAgent implements OnDestroy {
     this.subscriptions.add(sub);
   }
 
-  private updateProgressMetrics(feedback: SessionFeedback, plan: WorkoutPlan | null): void {
+  private updateProgressMetrics(feedback: SessionFeedback | undefined, plan: WorkoutPlan | null): void {
     const current = this.state.getCurrentProgress();
     const sessionsCompleted = current.sessionsCompleted + 1;
     const totalDays = plan ? plan.days.filter((d) => !d.isRestDay).length : 5;
@@ -117,7 +114,6 @@ export class ProgressAgent implements OnDestroy {
       lastUpdated: new Date(),
     });
   }
-
 
   private emitDecision(
     reason: string,

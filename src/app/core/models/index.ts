@@ -36,8 +36,6 @@ export type SessionFeedback = 'too_easy' | 'just_right' | 'too_hard';
 
 export type AgentName = 'PlannerAgent' | 'ProgressAgent' | 'RecoveryAgent' | 'CoachAgent';
 
-
-
 export interface UserProfile {
   uid: string;
   displayName: string;
@@ -47,7 +45,7 @@ export interface UserProfile {
   goals: string[];
   preferences: WorkoutPreferences;
   createdAt: Date;
-  
+
   onboardingCompleted: boolean;
   goal: GoalType;
   age: number;
@@ -61,9 +59,10 @@ export interface WorkoutPreferences {
   sessionDurationMinutes: number;
   availableEquipment: Equipment[];
   focusAreas: MuscleGroup[];
+  workoutSplit?: string;
+  cardioMinutes?: number;
+  defaultRestSeconds?: number;
 }
-
-
 
 export interface Exercise {
   id: string;
@@ -79,7 +78,7 @@ export interface Exercise {
 }
 
 export interface WorkoutDay {
-  day: number; 
+  day: number;
   label: string;
   focus: string;
   isRestDay: boolean;
@@ -99,37 +98,33 @@ export interface WorkoutPlan {
   agentReasoning: string;
 }
 
-
-
 export interface WorkoutSession {
   id: string;
   planId: string;
   userId: string;
   date: Date;
   dayIndex: number;
-  feedback: SessionFeedback;
+  feedback?: SessionFeedback;
   completedExerciseIds: string[];
   durationMinutes: number;
   notes?: string;
 }
 
 export interface FatigueLevel {
-  score: number; 
+  score: number;
   trend: 'increasing' | 'stable' | 'decreasing';
   lastUpdated: Date;
   recommendation: 'train' | 'light_session' | 'rest';
 }
 
 export interface ProgressMetrics {
-  weeklyConsistency: number; 
-  volumeProgression: number; 
+  weeklyConsistency: number;
+  volumeProgression: number;
   fatigueAverage: number;
   sessionsCompleted: number;
-  streak: number; 
+  streak: number;
   lastUpdated: Date;
 }
-
-
 
 
 export interface AgentDecision {
@@ -141,8 +136,6 @@ export interface AgentDecision {
   metadata?: Record<string, unknown>;
 }
 
-
-
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
@@ -150,9 +143,6 @@ export interface ChatMessage {
   timestamp: Date;
   isStreaming?: boolean;
 }
-
-
-
 
 export interface AiExerciseDto {
   id: string;
@@ -184,7 +174,6 @@ export interface AiWorkoutResponseDto {
   days: AiWorkoutDayDto[];
 }
 
-
 export interface OnboardingPayload {
   displayName: string;
   age: number;
@@ -194,13 +183,16 @@ export interface OnboardingPayload {
   limitations: string[];
   injuries: string;
   daysPerWeek: number;
+  workoutSplit: string;
+  focusAreas: string[];
+  cardioMinutes: number;
 }
 
 export interface AuthResponse {
   token: string;
-  user: { 
-    id: string; 
-    email: string; 
+  user: {
+    id: string;
+    email: string;
     displayName: string;
     onboardingCompleted: boolean;
     age?: number;
@@ -237,3 +229,12 @@ export interface ConversationMessage {
 export interface CoachChatRequest {
   message: string;
 }
+
+
+
+export interface Holiday {
+  date: string;
+  name: string;
+  type: string;
+}
+

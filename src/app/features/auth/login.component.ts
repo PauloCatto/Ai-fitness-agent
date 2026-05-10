@@ -32,6 +32,11 @@ export class LoginComponent implements OnInit {
   isLoading: boolean = false;
   errorMessage: string = '';
   authMode: AuthMode = 'register';
+  showPassword: boolean = false;
+
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
+  }
 
   readonly features: { icon: string; title: string; desc: string }[] = [
     { icon: '🧠', title: 'IA Personalizada', desc: 'Planos adaptados ao seu corpo e objetivos' },

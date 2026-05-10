@@ -2,15 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-
-export interface HttpOptions {
-  headers?: HttpHeaders | { [header: string]: string | string[] };
-  observe?: 'body';
-  params?: HttpParams | { [param: string]: string | number | boolean | ReadonlyArray<string | number | boolean> };
-  reportProgress?: boolean;
-  responseType?: 'json';
-  withCredentials?: boolean;
-}
+import { HttpOptions } from '../models/api.models';
 
 @Injectable({
   providedIn: 'root'

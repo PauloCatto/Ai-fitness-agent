@@ -4,6 +4,54 @@
     <app-loading-spinner [fullscreen]="true" message="Gerando seu treino com IA..." />
   }
 
+  @if (isRegenerating) {
+    <div class="regen-overlay glass-heavy">
+      <div class="regen-modal-container">
+        <div class="regen-modal glass">
+          <div class="regen-header">
+            <h2>Ajuste seu Treino</h2>
+            <p>Combine os grupos musculares e escolha a divisão ideal</p>
+          </div>
+
+          <form [formGroup]="profileForm" class="regen-form">
+            <div class="form-section">
+              <label>Divisão de Treino</label>
+              <div class="split-grid">
+                @for (split of workoutSplits; track split.value) {
+                  <div class="split-option" 
+                       [class.active]="profileForm.value.workoutSplit === split.value"
+                       (click)="profileForm.patchValue({workoutSplit: split.value})">
+                    <span class="split-label">{{ split.label }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="form-section">
+              <label>Grupos Musculares de Foco</label>
+              <div class="split-grid">
+                @for (muscle of availableMuscleGroups; track muscle.value) {
+                  <div class="split-option"
+                       [class.active]="isFocusAreaSelected(muscle.value)"
+                       (click)="toggleFocusArea(muscle.value)">
+                    <span class="split-label">{{ muscle.label }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="regen-actions">
+              <button type="button" class="btn-cancel-regen" (click)="cancelRegeneration()">Cancelar</button>
+              <button type="button" class="btn-confirm-regen" (click)="confirmRegeneration()">
+                Confirmar e Gerar Plano
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+
   @if (user$ | async; as user) {
     <section class="athlete-context glass" [class.editing]="isEditingProfile">
 
@@ -131,33 +179,56 @@
           <span class="badge-dot"></span>
           Semana {{ plan.weekNumber }} · {{ getFitnessLevelLabel(plan.fitnessLevel) }}
         </div>
-        <h1>Seu Plano de Treino</h1>
-        <p class="header-subtitle">
-          {{ getTrainingDaysCount(plan.days) }} dias de treino ·
-          {{ plan.estimatedWeeklyMinutes | duration }} por semana
-        </p>
+        <h1>{{ isTrainingActive ? 'Treino em Andamento' : 'Seu Plano de Treino' }}</h1>
+        @if (isTrainingActive) {
+          <div class="session-timer pulse">
+            <span class="timer-icon">⏱</span>
+            {{ elapsedTime | timer }}
+          </div>
+        } @else {
+          <p class="header-subtitle">
+            {{ getTrainingDaysCount(plan.days) }} dias de treino ·
+            {{ plan.estimatedWeeklyMinutes | duration }} por semana
+          </p>
+        }
       </div>
 
       <div class="header-actions">
-        <button
-          id="btn-toggle-reasoning"
-          class="btn-ghost-sm"
-          (click)="toggleReasoning()">
-          {{ showReasoning ? 'Ocultar Raciocínio' : 'Raciocínio da IA' }}
-        </button>
-        <button
-          id="btn-regenerate"
-          class="btn-accent-sm"
-          (click)="generatePlan()">
-          ↺ Regenerar
-        </button>
+        @if (!isTrainingActive) {
+          <button
+            id="btn-toggle-reasoning"
+            class="btn-ghost-sm"
+            (click)="toggleReasoning()">
+            {{ showReasoning ? 'Ocultar Raciocínio' : 'Raciocínio da IA' }}
+          </button>
+          <button
+            id="btn-regenerate"
+            class="btn-accent-sm"
+            (click)="generatePlan()">
+            ↺ Regenerar
+          </button>
+        } @else {
+          <button class="btn-danger-sm" (click)="finishWorkout()">
+            ⏹ Finalizar Treino
+          </button>
+        }
       </div>
     </header>
 
     @if (showReasoning) {
       <div class="reasoning-panel glass stagger-in">
         <div class="reasoning-icon">🤖</div>
-        <p>{{ plan.agentReasoning }}</p>
+        <div class="reasoning-content">
+          @if (isExplaining && !reasoningText) {
+            <p class="loading-text">{{ plan.agentReasoning ? 'Gerando detalhamento...' : 'Analisando plano...' }}</p>
+          }
+
+          <p class="reasoning-text">{{ reasoningText || plan.agentReasoning }}</p>
+          
+          @if (isExplaining) {
+            <span class="typing-cursor"></span>
+          }
+        </div>
       </div>
     }
 
@@ -240,47 +311,38 @@
                 <app-exercise-card 
                   [exercise]="exercise" 
                   [isCompleted]="isExerciseCompleted(exercise.id)"
+                  [canSwap]="!isTrainingActive || !isExerciseCompleted(exercise.id)"
                   (complete)="toggleExercise(exercise.id)"
+                  (swap)="swapExercise(exercise)"
                   class="exercise-card-full" />
               </div>
             }
           </div>
 
           
-          @if (!sessionFeedbackSent) {
-            <div class="feedback-section glass stagger-in" [class.disabled]="getCompletionProgress(day) < 50">
-              <h3 class="feedback-title">Como foi o treino de hoje?</h3>
-              @if (getCompletionProgress(day) < 50) {
-                <p class="feedback-lock">Conclua pelo menos 50% do treino para dar feedback.</p>
-              }
-              <div class="feedback-buttons">
-                <button
-                  id="btn-feedback-easy"
-                  class="feedback-btn easy"
-                  (click)="submitFeedback('too_easy')">
-                  😴 Muito Fácil
-                </button>
-                <button
-                  id="btn-feedback-done"
-                  class="feedback-btn done"
-                  (click)="submitFeedback('just_right')">
-                  ✅ Na Medida Certa
-                </button>
-                <button
-                  id="btn-feedback-hard"
-                  class="feedback-btn hard"
-                  (click)="submitFeedback('too_hard')">
-                  🔥 Muito Difícil
-                </button>
+          @if (!isTrainingActive && !sessionFeedbackSent) {
+            <div class="start-session-box glass stagger-in">
+              <h3>Pronto para começar?</h3>
+              <p>Inicie o modo de treino para cronometrar sua sessão e ter acompanhamento em tempo real.</p>
+              
+              <div class="rest-preference">
+                <label>Tempo de Descanso Padrão</label>
+                <div class="rest-pills">
+                  @for (opt of restOptions; track opt.value) {
+                    <button 
+                      type="button"
+                      class="rest-pill" 
+                      [class.active]="selectedRestTime === opt.value"
+                      (click)="selectedRestTime = opt.value">
+                      {{ opt.value }}s
+                    </button>
+                  }
+                </div>
               </div>
-            </div>
-          } @else {
-            <div class="feedback-sent stagger-in">
-              <span class="feedback-sent-icon">🎯</span>
-              <div>
-                <p class="feedback-sent-title">Feedback recebido!</p>
-                <p class="feedback-sent-sub">Nossos agentes de IA estão analisando sua sessão e podem ajustar seu plano.</p>
-              </div>
+
+              <button class="btn-primary-lg" (click)="startWorkout()">
+                ▶ Iniciar Treino de Hoje
+              </button>
             </div>
           }
         }
@@ -302,8 +364,7 @@
     }
   }
 
-  
-  @if (error$ | async; as err) {
-    <div class="error-bar">⚠ {{ err }}</div>
+  @if (isSwapping) {
+    <app-loading-spinner [fullscreen]="true" message="IA está buscando a melhor alternativa para você..." />
   }
 </div>

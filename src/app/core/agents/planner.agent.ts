@@ -2,13 +2,15 @@ import { Injectable, OnDestroy, inject } from '@angular/core';
 import { Subject, Subscription } from 'rxjs';
 import { switchMap, tap, catchError, EMPTY, filter } from 'rxjs';
 import { StateService } from '../state/state.service';
+import { AgentDecision, UserProfile, WorkoutPlan } from '../models';
+import { ToastService } from '../services/toast.service';
 import { AiService } from '../services/ai.service';
-import { AgentDecision, UserProfile } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class PlannerAgent implements OnDestroy {
   private readonly state = inject(StateService);
   private readonly aiService = inject(AiService);
+  private readonly toast = inject(ToastService);
 
   private readonly subscriptions = new Subscription();
   private readonly _trigger$ = new Subject<UserProfile>();
@@ -16,6 +18,7 @@ export class PlannerAgent implements OnDestroy {
   constructor() {
     this.initStream();
   }
+
   requestPlan(user: UserProfile): void {
     this._trigger$.next(user);
   }
@@ -41,10 +44,11 @@ export class PlannerAgent implements OnDestroy {
         filter((user) => user.onboardingCompleted),
         switchMap((user) =>
           this.aiService.generateWorkout(user).pipe(
+            switchMap((plan) => this.aiService.saveWorkoutPlan(plan)),
             catchError((err) => {
-              this.state.setError(err.message);
+              this.toast.show(err.message, 'error', 8000);
               this.state.setLoading(false);
-              this.emitDecision('Falha na geração do plano', `Erro: ${err.message}`, {
+              this.emitDecision('Falha na geração ou salvamento do plano', `Erro: ${err.message}`, {
                 error: err.message,
               });
               return EMPTY;

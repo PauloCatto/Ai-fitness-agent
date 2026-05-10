@@ -3,8 +3,8 @@ import { AsyncPipe, CommonModule } from '@angular/common';
 import { StateService } from '../../core/state/state.service';
 import { DashboardChartsComponent } from './components/dashboard-charts/dashboard-charts.component';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
-import { combineLatest, map, delay, startWith, Observable, of } from 'rxjs';
-import { HolidayService, Holiday } from '../../core/services/holiday.service';
+import { combineLatest, map, startWith } from 'rxjs';
+import { HolidayService } from '../../core/services/holiday.service';
 
 @Component({
   selector: 'app-dashboard',

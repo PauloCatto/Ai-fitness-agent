@@ -3,7 +3,6 @@ import { environment } from '../../../environments/environment';
 import { catchError, throwError } from 'rxjs';
 
 export const apiInterceptor: HttpInterceptorFn = (req, next) => {
-  // If the request URL starts with a '/', we prefix it with the API URL
   const isApiRequest = req.url.startsWith('/');
 
   let authReq = req;

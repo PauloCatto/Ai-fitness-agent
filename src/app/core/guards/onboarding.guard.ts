@@ -3,7 +3,6 @@ import { CanActivateFn, Router } from '@angular/router';
 import { map, take } from 'rxjs/operators';
 import { StateService } from '../state/state.service';
 
-
 export const onboardingGuard: CanActivateFn = () => {
   const state = inject(StateService);
   const router = inject(Router);
