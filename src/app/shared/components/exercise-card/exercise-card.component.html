@@ -7,6 +7,11 @@
         <h3 class="exercise-name">{{ exercise.name }}</h3>
       </div>
       <div class="action-row">
+        @if (canSwap && !isCompleted) {
+          <button class="swap-btn" (click)="onSwap($event)" title="Trocar exercício via IA">
+            <span class="swap-icon">↺</span>
+          </button>
+        }
         <button class="check-btn" (click)="onComplete($event)" [class.checked]="isCompleted" title="Marcar como concluído">
           <span class="check-icon">✓</span>
         </button>
@@ -17,19 +22,19 @@
     <div class="card-meta">
       <div class="meta-chips">
         @for (group of exercise.muscleGroups; track group) {
-          <span class="muscle-chip">{{ formatLabel(group) | titlecase }}</span>
+          <span class="muscle-chip">{{ formatLabel(group) }}</span>
         }
       </div>
       <div class="sets-reps">
         <span class="metric">
-          <strong>{{ exercise.sets }}</strong> sets
+          <strong>{{ exercise.sets }}</strong> séries
         </span>
         <span class="divider">×</span>
         <span class="metric">
           <strong>{{ exercise.reps }}</strong> reps
         </span>
         <span class="divider">·</span>
-        <span class="metric rest">{{ exercise.restSeconds }}s rest</span>
+        <span class="metric rest">{{ exercise.restSeconds }}s desc.</span>
       </div>
     </div>
   </div>
@@ -37,21 +42,57 @@
   
   @if (isExpanded) {
     <div class="card-body">
+      
+      @if (!isActive && !isCompleted) {
+        <div class="start-action">
+          <button class="btn-start-exercise" (click)="startExercise($event)">
+            ▶ Começar Exercício
+          </button>
+        </div>
+      }
+
+      @if (isActive) {
+        <div class="execution-mode">
+          @if (!isResting) {
+            <div class="set-tracker">
+              <span class="current-set-label">Série</span>
+              <div class="set-numbers">
+                <span class="current">{{ currentSet }}</span>
+                <span class="of">de</span>
+                <span class="total">{{ exercise.sets }}</span>
+              </div>
+              <button class="btn-complete-set" (click)="completeSet($event)">
+                Concluir Série {{ currentSet }}
+              </button>
+            </div>
+          } @else {
+            <div class="rest-mode" [class.is-over]="isRestOver">
+              <span class="rest-title">{{ isRestOver ? 'DESCANSO CONCLUÍDO' : 'Descanso' }}</span>
+              <div class="digital-clock">{{ isRestOver ? '00:00' : (restTimeLeft | timer) }}</div>
+              <div class="rest-alert" *ngIf="isRestOver">HORA DE VOLTAR! ⚡</div>
+              <button class="btn-skip-rest-sm" (click)="stopRestTimer()">
+                {{ isRestOver ? 'Começar Próxima Série' : 'Pular Descanso ⏭' }}
+              </button>
+            </div>
+          }
+        </div>
+      }
+
       <div class="instructions-block">
-        <p class="label">Instructions</p>
+        <p class="label">Instruções</p>
         <p class="instructions-text">{{ exercise.instructions }}</p>
       </div>
 
       @if (exercise.tips) {
         <div class="tips-block">
-          <p class="label">💡 Coach Tip</p>
+          <p class="label">💡 Dica do Coach</p>
           <p class="tips-text">{{ exercise.tips }}</p>
         </div>
       }
 
       <div class="equipment-row">
         @for (eq of exercise.equipment; track eq) {
-          <span class="equipment-badge">{{ formatLabel(eq) | titlecase }}</span>
+          <span class="equipment-badge">{{ formatLabel(eq) }}</span>
         }
       </div>
     </div>

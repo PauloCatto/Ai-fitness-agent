@@ -90,6 +90,32 @@
   }
 }
 
+.swap-btn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  font-size: 1.1rem;
+  transition: all 0.2s;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--warning);
+    color: var(--warning);
+    background: rgba(var(--warning-rgb, 234, 179, 8), 0.1);
+    transform: rotate(45deg);
+  }
+
+  &:active {
+    transform: rotate(180deg);
+  }
+}
+
 .exercise-card.completed {
   opacity: 0.8;
   border-color: var(--accent-glow);
@@ -143,6 +169,172 @@
   border-top: 1px solid var(--border);
   margin-top: 0;
   animation: slideDown 0.2s ease;
+}
+
+.start-action {
+  padding: 1.5rem 0;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-start-exercise {
+  width: 100%;
+  padding: 1rem;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: var(--accent);
+    color: var(--bg);
+    box-shadow: 0 0 20px var(--accent-glow);
+    transform: translateY(-2px);
+  }
+}
+
+.execution-mode {
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border);
+}
+
+.set-tracker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+
+  .current-set-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-3);
+  }
+
+  .set-numbers {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    
+    .current { font-size: 3rem; font-weight: 900; color: var(--text-1); line-height: 1; }
+    .of { font-size: 1.25rem; color: var(--text-3); font-weight: 500; }
+    .total { font-size: 2rem; font-weight: 700; color: var(--text-2); }
+  }
+}
+
+.btn-complete-set {
+  width: 100%;
+  padding: 0.875rem;
+  background: var(--text-1);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 0.5rem;
+
+  &:hover {
+    background: #fff;
+    transform: scale(1.02);
+  }
+}
+
+.rest-mode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s;
+
+  &.is-over {
+    .digital-clock {
+      color: var(--error);
+      text-shadow: 0 0 40px rgba(var(--error-rgb), 0.8);
+      animation: critical-pulse 0.5s infinite alternate;
+    }
+    .rest-title {
+      color: var(--error);
+    }
+    .btn-skip-rest-sm {
+      background: var(--text-1);
+      color: var(--bg);
+      border-color: #fff;
+      padding: 0.75rem 1.5rem;
+      font-weight: 800;
+      transform: scale(1.1);
+      margin-top: 1rem;
+    }
+  }
+
+  .rest-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--warning);
+  }
+
+  .digital-clock {
+    font-size: 4.5rem;
+    font-weight: 900;
+    color: var(--warning);
+    font-family: 'Courier New', Courier, monospace;
+    text-shadow: 0 0 30px rgba(var(--warning-rgb, 234, 179, 8), 0.6);
+    letter-spacing: -4px;
+    line-height: 1;
+    margin: 0.5rem 0;
+    animation: pulse-glow 2s infinite ease-in-out;
+  }
+
+  .btn-skip-rest-sm {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-3);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: all 0.2s;
+
+    &:hover {
+      border-color: var(--text-2);
+      color: var(--text-1);
+    }
+  }
+}
+
+.rest-alert {
+  color: var(--error);
+  font-weight: 900;
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.1em;
+  animation: bounce 0.5s infinite alternate;
+}
+
+@keyframes critical-pulse {
+  from { opacity: 0.7; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes bounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(-5px); }
+}
+
+@keyframes pulse-glow {
+  0% { opacity: 0.9; text-shadow: 0 0 20px rgba(var(--warning-rgb), 0.4); }
+  50% { opacity: 1; text-shadow: 0 0 40px rgba(var(--warning-rgb), 0.8); }
+  100% { opacity: 0.9; text-shadow: 0 0 20px rgba(var(--warning-rgb), 0.4); }
 }
 
 @keyframes slideDown {
