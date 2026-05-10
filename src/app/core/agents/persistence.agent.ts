@@ -7,9 +7,7 @@ export class PersistenceAgent {
   private readonly state = inject(StateService);
   private readonly STORAGE_KEY = 'ai_fitness_agent_data';
 
-  constructor() { }
-
-  ngOnInit(): void {
+  constructor() {
     this.init();
     this.setupAutoSave();
   }

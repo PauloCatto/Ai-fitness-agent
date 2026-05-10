@@ -12,9 +12,7 @@ export class ProgressAgent implements OnDestroy {
   private readonly subscriptions = new Subscription();
   private readonly _recalculate$ = new Subject<void>();
 
-  constructor() { }
-
-  ngOnInit(): void {
+  constructor() {
     this.initFeedbackStream();
     this.initRecalculationStream();
   }
@@ -98,7 +96,7 @@ export class ProgressAgent implements OnDestroy {
     this.subscriptions.add(sub);
   }
 
-  private updateProgressMetrics(feedback: SessionFeedback, plan: WorkoutPlan | null): void {
+  private updateProgressMetrics(feedback: SessionFeedback | undefined, plan: WorkoutPlan | null): void {
     const current = this.state.getCurrentProgress();
     const sessionsCompleted = current.sessionsCompleted + 1;
     const totalDays = plan ? plan.days.filter((d) => !d.isRestDay).length : 5;

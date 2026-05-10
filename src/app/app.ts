@@ -10,6 +10,7 @@ import { filter, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive, AsyncPipe, CommonModule, ToastComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss',

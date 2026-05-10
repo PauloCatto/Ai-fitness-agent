@@ -15,9 +15,7 @@ export class CoachAgent implements OnDestroy {
   private readonly _message$ = new Subject<CoachChatRequest>();
   private currentConversationId: string | null = null;
 
-  constructor() { }
-
-  ngOnInit(): void {
+  constructor() {
     this.initChatStream();
   }
 
