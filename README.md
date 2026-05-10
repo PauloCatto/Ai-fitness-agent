@@ -13,7 +13,7 @@ O projeto utiliza o que há de mais moderno no ecossistema Angular e padrões de
 
 - **🤖 Sistema Multi-Agente**: Arquitetura baseada em agentes de IA (Planner, Progress, Recovery, Coach) que colaboram para otimizar seu treino.
 - **Standalone Components**: Arquitetura moderna sem NgModules, mais leve e escalável.
-- **Reactive State Management**: Gerenciamento de estado robusto utilizando `BehaviorSubject` e `Signals` (Angular 19).
+- **Reactive State Management**: Gerenciamento de estado robusto utilizando `BehaviorSubject` e `Signals` (Angular 21).
 - **Zoneless-ready**: Preparado para alta performance com detecção de mudanças otimizada.
 - **Active Workout Mode**: Cronômetro de descanso inteligente com feedback tátil (vibração) e audiovisual (Web Audio API).
 
@@ -47,4 +47,29 @@ src/app/
 
 ## 🛠️ Como Executar
 
-Este é um projeto focado em demonstrar a integração de IA em aplicações Full Stack modernas. Sinta-se à vontade para abrir Issues ou Pull Requests.
+### Pré-requisitos
+- Node.js 18+ e npm instalados.
+
+### Instalação
+
+1.  Clone o repositório.
+2.  Instale as dependências:
+    ```bash
+    npm install
+    ```
+3.  Configure as variáveis de ambiente em `src/environments/environment.ts`:
+    ```typescript
+    export const environment = {
+      production: false,
+      apiUrl: 'http://localhost:5294/api', // URL da sua API .NET
+      holidayApiUrl: 'https://brasilapi.com.br/api/feriados/v1'
+    };
+    ```
+4.  Inicie o servidor de desenvolvimento:
+    ```bash
+    npm start
+    ```
+    *Acesse em `http://localhost:4200`*
+
+---
+Desenvolvido com ❤️ por **Paulo Catto**.
