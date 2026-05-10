@@ -338,7 +338,7 @@
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 10px;
-    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    padding: 0.75rem 2.5rem 0.75rem 2.5rem;
     color: #fff;
     font-size: 0.875rem;
     outline: none;
@@ -347,6 +347,31 @@
     &:focus {
       border-color: #A3E635;
       box-shadow: 0 0 0 2px rgba(163, 230, 53, 0.04);
+    }
+  }
+
+  .btn-toggle-password {
+    position: absolute;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s, transform 0.1s;
+    opacity: 0.4;
+    color: #fff;
+
+    &:hover {
+      opacity: 0.8;
+      transform: scale(1.1);
+    }
+
+    &:active {
+      transform: scale(0.9);
     }
   }
 }

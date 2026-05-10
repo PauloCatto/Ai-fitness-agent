@@ -120,10 +120,17 @@
               <span class="input-icon">🔒</span>
               <input
                 id="password"
-                type="password"
+                [type]="showPassword ? 'text' : 'password'"
                 placeholder="Mínimo 6 caracteres"
                 formControlName="password"
                 autocomplete="current-password">
+              <button 
+                type="button" 
+                class="btn-toggle-password" 
+                (click)="togglePassword()"
+                [attr.aria-label]="showPassword ? 'Ocultar senha' : 'Exibir senha'">
+                {{ showPassword ? '👁️‍🗨️' : '👁️' }}
+              </button>
             </div>
             @if (passwordInvalid) {
               <span class="field-error">Senha deve ter pelo menos 6 caracteres</span>
