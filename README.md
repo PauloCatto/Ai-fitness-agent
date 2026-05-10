@@ -47,29 +47,4 @@ src/app/
 
 ## 🛠️ Como Executar
 
-### Pré-requisitos
-- Node.js 18+ e npm instalados.
-
-### Instalação
-
-1.  Clone o repositório.
-2.  Instale as dependências:
-    ```bash
-    npm install
-    ```
-3.  Configure as variáveis de ambiente em `src/environments/environment.ts`:
-    ```typescript
-    export const environment = {
-      production: false,
-      apiUrl: 'http://localhost:5294/api', // URL da sua API .NET
-      holidayApiUrl: 'https://brasilapi.com.br/api/feriados/v1'
-    };
-    ```
-4.  Inicie o servidor de desenvolvimento:
-    ```bash
-    npm start
-    ```
-    *Acesse em `http://localhost:4200`*
-
----
-Desenvolvido com ❤️ por **Paulo Catto**.
+Este é um projeto focado em demonstrar a integração de IA em aplicações Full Stack modernas. Sinta-se à vontade para abrir Issues ou Pull Requests.
