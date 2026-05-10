@@ -1,11 +1,11 @@
 # 🏋️‍♂️ AI Fitness Agent — Frontend
 
-[![Angular](https://img.shields.io/badge/Angular-19-DD0031?style=for-the-badge&logo=angular)](https://angular.dev)
+[![Angular](https://img.shields.io/badge/Angular-21-DD0031?style=for-the-badge&logo=angular)](https://angular.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![RxJS](https://img.shields.io/badge/RxJS-Reactive-B71C1C?style=for-the-badge&logo=reactivex)](https://rxjs.dev/)
 [![UI/UX](https://img.shields.io/badge/UI/UX-Premium_Glassmorphism-blue?style=for-the-badge)](https://dribbble.com/)
 
-A interface de última geração para o seu Personal Trainer IA. Desenvolvido com **Angular 19**, o frontend do AI Fitness Agent oferece uma experiência premium, reativa e inteligente para transformar a forma como você treina.
+A interface de última geração para o seu Personal Trainer IA. Desenvolvido com **Angular 21**, o frontend do AI Fitness Agent oferece uma experiência premium, reativa e inteligente para transformar a forma como você treina.
 
 ## ✨ Diferenciais Técnicos
 
@@ -26,11 +26,12 @@ O projeto utiliza o que há de mais moderno no ecossistema Angular e padrões de
 
 ## 🛠️ Tech Stack
 
-- **Framework**: Angular 19
-- **Linguagem**: TypeScript
-- **Estilização**: CSS Moderno (Variables, Grid, Flexbox, Glassmorphism)
-- **Animações**: Angular Animations + Keyframes (Efeito Stagger)
-- **Comunicação**: HttpClient com Interceptor para JWT
+- **Framework**: Angular 21 (Zoneless ready)
+- **Linguagem**: TypeScript 5.x
+- **Gráficos**: Chart.js 4.x (Dashboard reativo)
+- **IA**: Google Generative AI SDK (Gemini Integration)
+- **Estilização**: CSS Moderno (Glassmorphism & Keyframes)
+- **Comunicação**: HttpClient + Interceptors JWT
 
 ## 📁 Estrutura de Pastas
 
