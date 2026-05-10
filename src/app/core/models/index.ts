@@ -1,7 +1,5 @@
 
 
-import { HttpHeaders, HttpParams } from '@angular/common/http';
-
 export type FitnessLevel = 'beginner' | 'intermediate' | 'advanced';
 
 export type GoalType = 'hypertrophy' | 'strength' | 'weight_loss' | 'endurance';
@@ -61,6 +59,9 @@ export interface WorkoutPreferences {
   sessionDurationMinutes: number;
   availableEquipment: Equipment[];
   focusAreas: MuscleGroup[];
+  workoutSplit?: string;
+  cardioMinutes?: number;
+  defaultRestSeconds?: number;
 }
 
 export interface Exercise {
@@ -103,7 +104,7 @@ export interface WorkoutSession {
   userId: string;
   date: Date;
   dayIndex: number;
-  feedback: SessionFeedback;
+  feedback?: SessionFeedback;
   completedExerciseIds: string[];
   durationMinutes: number;
   notes?: string;
@@ -182,6 +183,9 @@ export interface OnboardingPayload {
   limitations: string[];
   injuries: string;
   daysPerWeek: number;
+  workoutSplit: string;
+  focusAreas: string[];
+  cardioMinutes: number;
 }
 
 export interface AuthResponse {
@@ -226,17 +230,22 @@ export interface CoachChatRequest {
   message: string;
 }
 
-export interface HttpOptions {
-  headers?: HttpHeaders | { [header: string]: string | string[] };
-  observe?: 'body';
-  params?: HttpParams | { [param: string]: string | number | boolean | ReadonlyArray<string | number | boolean> };
-  reportProgress?: boolean;
-  responseType?: 'json';
-  withCredentials?: boolean;
-}
+
 
 export interface Holiday {
   date: string;
   name: string;
   type: string;
+}
+
+export interface WorkoutOption {
+  value: string;
+  label: string;
+  icon?: string;
+  description?: string;
+}
+
+export interface WorkoutOptionsResponse {
+  splits: WorkoutOption[];
+  muscleGroups: WorkoutOption[];
 }

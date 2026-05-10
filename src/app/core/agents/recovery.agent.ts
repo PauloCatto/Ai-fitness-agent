@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy, inject } from '@angular/core';
-import { Subject, Subscription, interval } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { tap, withLatestFrom, filter, map } from 'rxjs';
 import { StateService } from '../state/state.service';
 import { AgentDecision, FatigueLevel } from '../models';
@@ -10,9 +10,7 @@ export class RecoveryAgent implements OnDestroy {
   private readonly subscriptions = new Subscription();
   private readonly _evaluate$ = new Subject<void>();
 
-  constructor() { }
-
-  ngOnInit(): void {
+  constructor() {
     this.initSessionMonitor();
     this.initManualEvaluation();
   }
