@@ -1,13 +1,31 @@
 @if ((user$ | async) && !isLoginPage()) {
   <div class="bg-glow"></div>
-  <div class="app-shell" [class.sidebar-collapsed]="isSidebarCollapsed()">
-    
+
+  <div class="app-shell" [class.sidebar-collapsed]="isSidebarCollapsed()" [class.mobile-menu-open]="isMobileMenuOpen()">
+
+    <!-- Header Mobile (fixed, só visível no mobile) -->
+    <header class="mobile-header">
+      <button class="hamburger-btn" (click)="toggleMobileMenu()" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="mobile-logo">Fitness IA</div>
+      <div class="user-avatar-sm">{{ (user$ | async)?.displayName?.charAt(0) }}</div>
+    </header>
+
+    <!-- Overlay para fechar o menu no mobile -->
+    <div class="mobile-overlay" (click)="closeMobileMenu()"></div>
+
     <button class="sidebar-toggle" (click)="toggleSidebar()" [title]="isSidebarCollapsed() ? 'Expandir' : 'Recolher'">
       <span class="toggle-icon">{{ isSidebarCollapsed() ? '›' : '‹' }}</span>
     </button>
 
-    <aside class="sidebar" [class.collapsed]="isSidebarCollapsed()">
+    <aside class="sidebar" [class.collapsed]="isSidebarCollapsed()" [class.mobile-open]="isMobileMenuOpen()">
       
+      <!-- Botão para fechar no mobile -->
+      <button class="mobile-close-btn" (click)="closeMobileMenu()">×</button>
+
       <div class="sidebar-logo">
         <div class="logo-icon">
           <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
@@ -27,6 +45,7 @@
           id="nav-workout"
           routerLink="/workout"
           routerLinkActive="active"
+          (click)="closeMobileMenu()"
           class="nav-item">
           <span class="nav-icon">🏋️</span>
           <span class="nav-label">Treino</span>
@@ -35,6 +54,7 @@
           id="nav-dashboard"
           routerLink="/dashboard"
           routerLinkActive="active"
+          (click)="closeMobileMenu()"
           class="nav-item">
           <span class="nav-icon">📊</span>
           <span class="nav-label">Painel</span>
@@ -43,6 +63,7 @@
           id="nav-chat"
           routerLink="/chat"
           routerLinkActive="active"
+          (click)="closeMobileMenu()"
           class="nav-item">
           <span class="nav-icon">🤖</span>
           <span class="nav-label">Coach IA</span>

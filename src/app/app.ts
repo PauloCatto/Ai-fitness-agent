@@ -41,9 +41,18 @@ export class App implements OnInit {
   isLoginPage = computed(() => this.url()?.includes('/login') ?? true);
 
   isSidebarCollapsed = signal(false);
+  isMobileMenuOpen = signal(false);
 
   toggleSidebar(): void {
     this.isSidebarCollapsed.update(v => !v);
+  }
+
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen.update(v => !v);
+  }
+
+  closeMobileMenu(): void {
+    this.isMobileMenuOpen.set(false);
   }
 
   signOut(): void {

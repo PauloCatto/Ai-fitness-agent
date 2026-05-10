@@ -10,6 +10,116 @@
   position: relative;
 }
 
+.mobile-header {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 1rem;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 5000;
+
+  @media (max-width: 768px) {
+    display: flex;
+  }
+}
+
+.mobile-logo {
+  font-weight: 800;
+  color: var(--accent);
+  font-size: 1.125rem;
+}
+
+.user-avatar-sm {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.hamburger-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  position: relative;
+  width: 40px;
+  height: 40px;
+  justify-content: center;
+  align-items: center;
+
+  span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--text-1);
+    border-radius: 2px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: absolute;
+
+    &:nth-child(1) {
+      transform: translateY(-7px);
+    }
+
+    &:nth-child(2) {
+      opacity: 1;
+    }
+
+    &:nth-child(3) {
+      transform: translateY(7px);
+    }
+  }
+
+  .mobile-menu-open & {
+    span {
+      &:nth-child(1) {
+        transform: rotate(45deg);
+      }
+
+      &:nth-child(2) {
+        opacity: 0;
+        transform: translateX(10px);
+      }
+
+      &:nth-child(3) {
+        transform: rotate(-45deg);
+      }
+    }
+  }
+}
+
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 2500;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+
+  .mobile-menu-open & {
+    display: block;
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
 .sidebar {
   width: 256px;
   min-width: 256px;
@@ -28,7 +138,12 @@
     min-width: 80px;
     padding: 1.5rem 0.75rem;
 
-    .logo-text, .nav-label, .nav-badge, .fatigue-widget, .agent-activity, .user-info {
+    .logo-text,
+    .nav-label,
+    .nav-badge,
+    .fatigue-widget,
+    .agent-activity,
+    .user-info {
       display: none;
     }
 
@@ -45,18 +160,62 @@
     .sidebar-user {
       padding: 0.875rem 0;
       justify-content: center;
-      
+
       .signout-btn {
         display: none;
       }
     }
+  }
+
+  @media (max-width: 768px) {
+    display: flex !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 10000;
+    transform: translateX(-100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.8);
+    background: #0a0a0f !important;
+    border-right: 1px solid var(--accent);
+    width: 260px;
+    min-width: 260px;
+    padding: 1.5rem 1rem;
+
+    &.mobile-open {
+      transform: translateX(0) !important;
+    }
+  }
+}
+
+.mobile-close-btn {
+  display: none;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  color: var(--text-3);
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 10001;
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+
+  &:hover {
+    color: var(--error);
   }
 }
 
 .sidebar-toggle {
   position: absolute;
   top: 2rem;
-  left: 244px; // Alinhado com a borda da sidebar (256px de largura)
+  left: 244px;
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -72,7 +231,11 @@
   box-shadow: 0 0 12px var(--accent-glow);
 
   .sidebar-collapsed & {
-    left: 68px; // Para sidebar de 80px
+    left: 68px;
+  }
+
+  @media (max-width: 768px) {
+    display: none;
   }
 
   &:hover {
@@ -160,8 +323,14 @@
   }
 }
 
-.nav-icon { font-size: 1.125rem; flex-shrink: 0; }
-.nav-label { flex: 1; }
+.nav-icon {
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+
+.nav-label {
+  flex: 1;
+}
 
 .nav-badge {
   width: 8px;
@@ -173,8 +342,17 @@
 }
 
 @keyframes badgePulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.3); opacity: 0.7; }
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.3);
+    opacity: 0.7;
+  }
 }
 
 .fatigue-widget {
@@ -198,7 +376,7 @@
 
 .fatigue-track {
   height: 4px;
-  background: rgba(255,255,255,0.06);
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 2px;
   overflow: hidden;
   margin-bottom: 0.5rem;
@@ -217,7 +395,9 @@
   margin: 0;
 }
 
-.sidebar-spacer { flex: 1; }
+.sidebar-spacer {
+  flex: 1;
+}
 
 .agent-activity {
   display: flex;
@@ -237,8 +417,15 @@
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.3;
+  }
 }
 
 .sidebar-user {
@@ -310,5 +497,12 @@
 .main-content {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   background: var(--bg);
+  position: relative;
+  min-width: 0;
+
+  @media (max-width: 768px) {
+    padding-top: 60px;
+  }
 }
