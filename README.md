@@ -79,6 +79,3 @@ npm start
 ## 🤝 Contribuição
 
 Este é um projeto focado em demonstrar a integração de IA em aplicações Full Stack modernas. Sinta-se à vontade para abrir Issues ou Pull Requests.
-
----
-Desenvolvido com ❤️ e Inteligência Artificial.
