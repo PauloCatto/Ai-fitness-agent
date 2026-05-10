@@ -7,6 +7,8 @@ import { UserService } from '../../core/services/user.service';
 import { ToastService } from '../../core/services/toast.service';
 import { PlannerAgent } from '../../core/agents/planner.agent';
 import { GoalType, FitnessLevel, PhysicalLimitation, UserProfile } from '../../core/models';
+import { ConfigService } from '../../core/services/config.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-onboarding',
@@ -22,32 +24,23 @@ export class OnboardingComponent {
   private readonly planner = inject(PlannerAgent);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
-  readonly totalSteps = 5;
+  private readonly configService = inject(ConfigService);
+
+  readonly options = toSignal(this.configService.getWorkoutOptions());
+
+  readonly totalSteps = 8;
   readonly currentStep = signal(1);
   readonly isLoading = signal(false);
 
   readonly progressPercent = computed(() =>
-    Math.round(((this.currentStep() - 1) / this.totalSteps) * 100),
+    Math.round(((this.currentStep()) / this.totalSteps) * 100),
   );
 
   readonly nameCtrl = new FormControl<string>('', Validators.required);
   readonly ageCtrl = new FormControl<number | null>(null, [Validators.required, Validators.min(13), Validators.max(100)]);
   readonly weightCtrl = new FormControl<number | null>(null, [Validators.required, Validators.min(30), Validators.max(300)]);
 
-  readonly goals: { value: GoalType; label: string; icon: string; description: string }[] = [
-    { value: 'hypertrophy', label: 'Hipertrofia', icon: '💪', description: 'Ganhar massa muscular' },
-    { value: 'strength', label: 'Força', icon: '🏋️', description: 'Aumentar carga nos exercícios' },
-    { value: 'weight_loss', label: 'Emagrecimento', icon: '🔥', description: 'Perder gordura corporal' },
-    { value: 'endurance', label: 'Resistência', icon: '🏃', description: 'Melhorar condicionamento' },
-  ];
-
   readonly goalCtrl = new FormControl<GoalType | null>(null, Validators.required);
-  readonly levels: { value: FitnessLevel; label: string; icon: string; description: string }[] = [
-    { value: 'beginner', label: 'Iniciante', icon: '🌱', description: 'Até 6 meses de treino' },
-    { value: 'intermediate', label: 'Intermediário', icon: '⚡', description: '6 meses a 2 anos' },
-    { value: 'advanced', label: 'Avançado', icon: '🔥', description: 'Mais de 2 anos' },
-  ];
-
   readonly levelCtrl = new FormControl<FitnessLevel | null>(null, Validators.required);
   readonly frequencies = [2, 3, 4, 5, 6];
   readonly daysCtrl = new FormControl<number | null>(null, [
@@ -55,6 +48,10 @@ export class OnboardingComponent {
     Validators.min(2),
     Validators.max(6),
   ]);
+
+  readonly splitCtrl = new FormControl<string>('ai_choice', Validators.required);
+  readonly focusAreasCtrl = new FormControl<string[]>([]);
+  readonly cardioCtrl = new FormControl<number>(15, [Validators.required, Validators.min(0), Validators.max(60)]);
 
 
   readonly limitationOptions: { value: PhysicalLimitation; label: string }[] = [
@@ -77,6 +74,9 @@ export class OnboardingComponent {
       case 3: return this.levelCtrl.valid;
       case 4: return this.daysCtrl.valid;
       case 5: return true;
+      case 6: return this.splitCtrl.valid;
+      case 7: return this.cardioCtrl.valid;
+      case 8: return true;
       default: return false;
     }
   }
@@ -104,6 +104,15 @@ export class OnboardingComponent {
     }
   }
 
+  toggleFocusArea(val: string): void {
+    const current = this.focusAreasCtrl.value || [];
+    if (current.includes(val)) {
+      this.focusAreasCtrl.setValue(current.filter(i => i !== val));
+    } else {
+      this.focusAreasCtrl.setValue([...current, val]);
+    }
+  }
+
   submit(): void {
     const base = this.state.getCurrentUser();
     if (!base) return;
@@ -119,6 +128,9 @@ export class OnboardingComponent {
       limitations: [...this.selectedLimitations],
       injuries: this.injuriesCtrl.value?.trim() ?? '',
       daysPerWeek: this.daysCtrl.value!,
+      workoutSplit: this.splitCtrl.value!,
+      focusAreas: this.focusAreasCtrl.value || [],
+      cardioMinutes: this.cardioCtrl.value!,
     };
 
     this.userService.saveOnboarding(payload).subscribe({
@@ -132,12 +144,14 @@ export class OnboardingComponent {
             daysPerWeek: payload.daysPerWeek,
             sessionDurationMinutes: 60,
             availableEquipment: ['barbell', 'dumbbell', 'machine', 'bodyweight'],
-            focusAreas: ['chest', 'back', 'legs', 'core'],
+            focusAreas: (payload.focusAreas as any[]),
+            workoutSplit: payload.workoutSplit,
+            cardioMinutes: payload.cardioMinutes
           },
         };
         this.state.setUser(profile);
         this.planner.requestPlan(profile);
-        this.toast.show('💪 Perfil salvo! Gerando seu plano de treinos...', 'success');
+        this.toast.show('💪 Perfil profissional salvo! Gerando seu plano...', 'success');
         this.router.navigate(['/workout']);
       },
       error: (err) => {

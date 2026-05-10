@@ -52,11 +52,11 @@
         <p class="ob-subtitle">Isso define a estrutura do seu plano de treino</p>
 
         <div class="ob-option-grid">
-          @for (g of goals; track g.value) {
+          @for (g of options()?.goals; track g.value) {
             <button
               class="ob-option"
               [class.selected]="goalCtrl.value === g.value"
-              (click)="goalCtrl.setValue(g.value)">
+              (click)="goalCtrl.setValue($any(g.value))">
               <span class="ob-option-icon">{{ g.icon }}</span>
               <span class="ob-option-label">{{ g.label }}</span>
               <span class="ob-option-desc">{{ g.description }}</span>
@@ -73,11 +73,11 @@
         <p class="ob-subtitle">Seja honesto — isso garante um plano seguro e eficaz</p>
 
         <div class="ob-option-list">
-          @for (lv of levels; track lv.value) {
+          @for (lv of options()?.levels; track lv.value) {
             <button
               class="ob-option-row"
               [class.selected]="levelCtrl.value === lv.value"
-              (click)="levelCtrl.setValue(lv.value)">
+              (click)="levelCtrl.setValue($any(lv.value))">
               <span class="ob-option-icon">{{ lv.icon }}</span>
               <div class="ob-option-text">
                 <span class="ob-option-label">{{ lv.label }}</span>
@@ -125,7 +125,81 @@
     }
 
     
+    <!-- Step 5: Focus Areas -->
     @if (currentStep() === 5) {
+      <div class="ob-step">
+        <h2 class="ob-title">Quais áreas você quer priorizar?</h2>
+        <p class="ob-subtitle">Selecione os grupos musculares que receberão mais atenção</p>
+
+        <div class="ob-focus-grid">
+          @for (m of options()?.muscleGroups; track m.value) {
+            <button
+              class="ob-focus-btn"
+              [class.selected]="focusAreasCtrl.value?.includes(m.value)"
+              (click)="toggleFocusArea(m.value)">
+              {{ m.label }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Step 6: Workout Split -->
+    @if (currentStep() === 6) {
+      <div class="ob-step">
+        <h2 class="ob-title">Como você prefere dividir seu treino?</h2>
+        <p class="ob-subtitle">Escolha a estrutura que melhor se adapta à sua rotina</p>
+
+        <div class="ob-option-list">
+          @for (s of options()?.splits; track s.value) {
+            <button
+              class="ob-option-row"
+              [class.selected]="splitCtrl.value === s.value"
+              (click)="splitCtrl.setValue(s.value)">
+              <span class="ob-option-icon">{{ s.icon }}</span>
+              <div class="ob-option-text">
+                <span class="ob-option-label">{{ s.label }}</span>
+                <span class="ob-option-desc">{{ s.description }}</span>
+              </div>
+              @if (splitCtrl.value === s.value) {
+                <span class="ob-check">✓</span>
+              }
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Step 7: Cardio preferences -->
+    @if (currentStep() === 7) {
+      <div class="ob-step">
+        <h2 class="ob-title">E o cardio? 🏃</h2>
+        <p class="ob-subtitle">Quanto tempo você deseja dedicar por sessão?</p>
+
+        <div class="ob-cardio-selector">
+          <div class="ob-cardio-display">
+            <span class="ob-cardio-value">{{ cardioCtrl.value }}</span>
+            <span class="ob-cardio-unit">minutos</span>
+          </div>
+          <input 
+            type="range" 
+            min="0" 
+            max="60" 
+            step="5" 
+            [formControl]="cardioCtrl" 
+            class="ob-range">
+          
+          <div class="ob-cardio-hint">
+            @if (cardioCtrl.value === 0) { Zero cardio? Foco total no ferro! 🏋️ }
+            @else if (cardioCtrl.value! < 20) { Um aquecimento ou finalização rápida. }
+            @else { Foco em queima calórica e saúde cardiovascular! }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Step 8: Limitations -->
+    @if (currentStep() === 8) {
       <div class="ob-step">
         <h2 class="ob-title">Você tem alguma limitação física?</h2>
         <p class="ob-subtitle">Opcional, mas importante para um treino seguro</p>

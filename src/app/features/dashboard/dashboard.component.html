@@ -15,7 +15,7 @@
         <div class="card-icon">🏖️</div>
         <div class="card-content">
           <h3>Próximo Feriado: {{ vm.holiday.name }}</h3>
-          <p>Está chegando no dia {{ vm.holiday.date | date:'dd/MM' }}! Treine firme agora para aproveitar a praia sem culpa depois. 💪</p>
+          <p>Está chegando no dia {{ vm.holiday.date | date:'dd' }} de {{ vm.holiday.date | date:'MMMM' }}! Treine firme agora para aproveitar a praia sem culpa depois. 💪</p>
         </div>
       </div>
     }
