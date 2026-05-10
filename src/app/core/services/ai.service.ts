@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, of, throwError, from, switchMap, firstValueFrom } from 'rxjs';
+import type { GenerateContentResult, EnhancedGenerateContentResponse } from '@google/generative-ai';
 import { HttpClient } from '@angular/common/http';
 import { map, catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
@@ -83,7 +84,7 @@ export class AiService {
   suggestAlternative(exercise: Exercise, profile: UserProfile): Observable<Exercise> {
     const prompt = this.buildSwapPrompt(exercise, profile);
     return from(this.getGeminiModel()).pipe(
-      switchMap((model) => from(model.generateContent(prompt))),
+      switchMap((model) => from(model.generateContent(prompt) as Promise<GenerateContentResult>)),
       map((result) => {
         const raw = result.response.text();
         const cleaned = raw.replace(/```json|```/g, '').trim();
@@ -112,7 +113,7 @@ export class AiService {
     const prompt = this.buildWorkoutPrompt(profile, existingPlan, feedbackReason);
 
     return from(this.getGeminiModel()).pipe(
-      switchMap((model) => from(model.generateContent(prompt))),
+      switchMap((model) => from(model.generateContent(prompt) as Promise<GenerateContentResult>)),
       map((result) => {
         const raw = result.response.text();
         return this.parseWorkoutResponse(raw, profile);
@@ -129,7 +130,7 @@ export class AiService {
       this.getGeminiModel().then((model) => {
         model
           .generateContentStream(prompt)
-          .then((streamResult) => {
+          .then((streamResult: any) => {
             (async () => {
               try {
                 for await (const chunk of streamResult.stream) {
@@ -137,12 +138,12 @@ export class AiService {
                   if (text) observer.next(text);
                 }
                 observer.complete();
-              } catch (err) {
+              } catch (err: any) {
                 observer.error(err);
               }
             })();
           })
-          .catch((err) => observer.error(err));
+          .catch((err: any) => observer.error(err));
       });
 
       return () => { };
