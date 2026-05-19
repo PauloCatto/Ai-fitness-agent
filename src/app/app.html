@@ -43,28 +43,31 @@
       <nav class="sidebar-nav">
         <a
           id="nav-workout"
-          routerLink="/workout"
+          [routerLink]="(user$ | async)?.onboardingCompleted ? '/workout' : null"
           routerLinkActive="active"
           (click)="closeMobileMenu()"
-          class="nav-item">
+          class="nav-item"
+          [class.disabled]="!(user$ | async)?.onboardingCompleted">
           <span class="nav-icon">🏋️</span>
           <span class="nav-label">Treino</span>
         </a>
         <a
           id="nav-dashboard"
-          routerLink="/dashboard"
+          [routerLink]="(user$ | async)?.onboardingCompleted ? '/dashboard' : null"
           routerLinkActive="active"
           (click)="closeMobileMenu()"
-          class="nav-item">
+          class="nav-item"
+          [class.disabled]="!(user$ | async)?.onboardingCompleted">
           <span class="nav-icon">📊</span>
           <span class="nav-label">Painel</span>
         </a>
         <a
           id="nav-chat"
-          routerLink="/chat"
+          [routerLink]="(user$ | async)?.onboardingCompleted ? '/chat' : null"
           routerLinkActive="active"
           (click)="closeMobileMenu()"
-          class="nav-item">
+          class="nav-item"
+          [class.disabled]="!(user$ | async)?.onboardingCompleted">
           <span class="nav-icon">🤖</span>
           <span class="nav-label">Coach IA</span>
           @if ((workoutPlan$ | async) !== null) {
